@@ -10,3 +10,11 @@
 1. `npm install`
 2. `gulp`
 3. Now, navigate to localhost:80 in your browser.
+
+## Github [TODO]
+### How we are going to handle working on features
+### How we are going to handle issues
+
+## Communication [TODO]
+* Discord channel?
+* Slack?
