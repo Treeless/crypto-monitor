@@ -1,0 +1,56 @@
+{
+  "name": "cryptometer",
+  "version": "1.0.0",
+  "description": "Cryptocurrency monitor and market analysis tool",
+  "main": "index.js",
+  "scripts": {
+    "test": "gulp unit"
+  },
+  "author": {
+    "name": "Matthew Rowlandson",
+    "email": "matt@fyrespark.com",
+    "url": "https://www.github.com/Treeless"
+  },
+  "contributors": [
+    {
+      "name": "Eliot Boyd",
+      "email": "eliotboyd@trentu.ca",
+      "url": "https://www.github.com/Sidelaunch"
+    },
+    {
+      "name": "Nakul Rogehelia",
+      "email": "nakulroghelia@trentu.ca",
+      "url": "https://www.github.com/nhavoc"
+    },
+    {
+      "name": "Michael Dragan",
+      "email": "MichaelDragan@trentu.ca",
+      "url": "https://www.github.com/MichaelDragan"
+    }
+  ],
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "chalk": "^2.3.0",
+    "ejs": "^2.5.7",
+    "express": "^4.16.2",
+    "mongoose": "^4.12.4"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "chai-http": "^3.0.0",
+    "del": "^3.0.0",
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^4.0.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-cssnano": "^2.1.2",
+    "gulp-nodemon": "^2.2.1",
+    "gulp-sass": "^3.1.0",
+    "gulp-spawn-mocha": "^3.3.1",
+    "gulp-util": "^3.0.8",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.5.3",
+    "sinon": "^4.0.0",
+    "sinon-chai": "^2.14.0"
+  },
+  "license": "ISC"
+}
