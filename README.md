@@ -1,7 +1,12 @@
-#ARE YOU BOYS READY FOR THIS?!
+# ARE YOU BOYS READY FOR THIS?!
 
-##How to get the application running
+## Technologies we need to install
 
-`npm install`
-`gulp`
-Now, navigate to localhost:80 in your browser.
+1. NodeJS 8.4+
+2. MongoDB (install this as a service)
+
+## How to get the application running
+
+1. `npm install`
+2. `gulp`
+3. Now, navigate to localhost:80 in your browser.
