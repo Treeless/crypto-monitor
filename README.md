@@ -11,13 +11,10 @@
 2. `gulp`
 3. Now, navigate to localhost:80 in your browser.
 
-## Github [TODO]
-### How we are going to handle working on features
-### How we are going to handle issues
-
-## Communication [TODO]
-* Discord channel?
-* Slack?
+## TODO LIST
+1. work together on getting posts from a coins subreddit, and evaluating and ranking the post based on engagement
+2. a news article listing system based on a coin. So finding articles on reddit and saving their links
+3. coin prices charted from that api NAKUL found
 
 ## WEEKLIES:
 
