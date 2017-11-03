@@ -19,13 +19,13 @@
 * Discord channel?
 * Slack?
 
-##WEEKLIES:
+## WEEKLIES:
 
-Talking with OMAR - 2017-11-03
-* Issue: No subreddit traffic
-
+Talking with OMAR - <strong>2017-11-03</strong>
+* <em>Issue</em>: No subreddit traffic api, has been deprecated
+* <strong>Recommended Solution</strong>: Create a library for subreddit post engagement evaluation. (we can also mine news articles during this process)
 * RESEARCH: Papers -> Engagement - HISTORY
 * How do they mine? Posts for engagement. Formula? Weights ;)
 * Information Retrieval Papers
 * Japan, wikipedia, scraping. Rank based on importance. What can we pull from these examples?
-* OUTCOME: We need to create a library that will pull in reddit posts from a specific subreddit and rank each post based on upvotes, comments, golded comments, and all out engagement. Then using the ranking system, graph the weights alongside the price of the coin.
+* <strong>OUTCOME</strong>: We need to create a library that will pull in reddit posts from a specific subreddit and rank each post based on upvotes, comments, golded comments, and all out engagement. Then using the ranking system, graph the weights alongside the price of the coin.
