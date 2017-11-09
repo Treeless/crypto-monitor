@@ -2,6 +2,34 @@
 <html>
   <head>
     <meta charset="utf-8" lang="en" />
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+    <script>
+    $.getJSON('/btc/price-history', function (json) {
+      console.log(json.data);
+
+        // Create the chart
+        Highcharts.stockChart('chart-div', {
+            rangeSelector: {
+                selected: 1
+            },
+
+            title: {
+                text: 'Bitcoin Historical Price'
+            },
+
+            series: [{
+                name: 'Bitcoin',
+                data: json.data,
+                tooltip: {
+                    valueDecimals: 2
+                }
+            }]
+        });
+    });
+
+    </script>
   </head>
   <body>
     <header>
@@ -9,6 +37,7 @@
     </header>
     <div class="container">
       <p>Question: Are we going to use bootstrap??</p>
+      <div id="chart-div"></div>
     </div>
   </body>
 </html>
