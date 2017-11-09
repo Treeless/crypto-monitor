@@ -1,4 +1,7 @@
+// Backend server
+
 (function() {
+  // 
   const Express = require('express'),
     Chalk = require('chalk'),
     BodyParser = require('body-parser'),
@@ -17,7 +20,10 @@
 
   //Main homepage view route
   app.get('/', function(req, res) {
-    res.render("index.ejs", {});
+    console.log("HOMEPAGE");
+    res.render("index.ejs", {
+      title: "MAIN PAGE"
+    });
   });
 
   //API route for retrieving the bitcoin price
