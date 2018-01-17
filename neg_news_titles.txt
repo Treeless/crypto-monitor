@@ -1,0 +1,24 @@
+Pierre Rochard: "Until your altcoin successfully defeats a coordinated attack like NYA/S2X, with 90% of the hashrate and major businesses trying to force a hard fork, its immutability is untested and its monetary policy is suspect. Bitcoin has earned its keep, its immutability is beyond question"
+8 MB blocks have a lot fewer transactions than 1.06MB Segwit blocks
+We must boycott CMC
+Report the scam site bitcoin,com to trustpilot and warn new users with that!
+Roger Ver/Jihan Wu are now learning why Satoshi set the block size limit to 1MB.
+Coinmarketcap just removed references of bitcoin.com and block explorer
+First they ignore you. Then they ridicule you. Then they fight you. And then you win.
+In case you forgot, it has been 80 days since the last empty mempool
+Bcash &amp; Coinbase: collusion, manipulation, and FUD
+BIP173 (Native P2WKPH AKA Bech32) doesn't have a Java reference implementation listed in the BIP, and bitcoinj fails to implement it. Java coders needed!
+**Coinmarketcap after removing bitcoin.com as the legit website 2 NOW it shows it ON again.** Fuck them
+Beware!Kraken Lost My 180k USD Wire Transfer
+“Mtgox won’t be around in a year. “ From the Lawsuit posted.
+#LightningNetwork development is kicking ass! Number of nodes and channels doubled from last week. Now running on 550+ nodes close to 2,000 channels.
+"Show this when someone lies and says Bitcoin Core dev process is centralized."
+Avoid fake exchanges with Cryptonite browser extension
+UK Bitcoin Investors Denied Mortgages To Buy Homes
+Potential Bitcoin Price Manipulation / Mitigation Options
+Day 8: I will post this guide regularly until available solutions like SegWit, order batching, and Lightning payment channels are mass adopted, the mempool is empty once again, and tx fees are low. BTC Core SegWit GUI coming May 1, Coinbase incompetence exposed, more exchanges deploy SegWit
+Was Mt gox actually PRETENDED TO BE HACKED?
+Why are Koreans so obsessed with Bitcoin/Cryptocurrency?
+I was bored this Sunday so I wrote this MindWallet based on the argon2 hash function, what do you think?
+All these bubble FUD
+Roger Ver rebranding Bitcoin, but almost cries when people call BTrash something else. Double standard at it's finest...
