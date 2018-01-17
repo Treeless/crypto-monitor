@@ -6,6 +6,8 @@ This module sifts through the tweets and retweets of a specified twitter page,
 compartmentalize the tweets based off their sentiment, and stores their content
 in three .txt files (neg_tweets, pos_tweets, and neu_tweets).
 
+Use python 3.6 + to execute
+
 Required Libraries:
 - re
 - tweepy
@@ -15,6 +17,11 @@ Required Libraries:
 IMPORTANT: On your python interpreter, please input the following:
 import nltk nltk.download()
     - install all the packages within the window that pops up.
+
+Updates:
+- Stores tweeets from @Bitcoin, @Ripple, @ethereumproject, bgarlinghouse
+and twitter feed containing bitcoin keyword
+- get_ratio_count returns ratio double to use for ranking algorithm
 
 TODO:
 - Should we remove retweets? Who should we 
@@ -26,6 +33,11 @@ follow?
 within the neutral list. Find out why and how to remove these from the list.
 
 - Improve code documentation for better readability
+
+- Method to save tweets in .txt format
+
+- Update method to run once we get an actual server running
+    - Consider frequency of which to update .txt files.
 """
 import re
 import tweepy
@@ -60,7 +72,7 @@ class TwitterClient(object):
 
         return result['compound']
 
-    def get_tweets(self, id):
+    def get_tweets_user(self, id):
         """ Returns list of most recent tweets andfrom a Twitter account.
         
         Uses get_tweet_sentiment in order to store tweet sentiment.
@@ -85,20 +97,31 @@ class TwitterClient(object):
         
         except tweepy.TweepError as e:
             print("Error : " + str(e))
+    
+    def get_tweet_feed(self, query, count):
 
-def main():
-    """
-    Instantiates twitter client, retrieves tweets, categorizes tweets into 
-    positive, neutral, or negative lists. Optional to print tweets from each 
-    list. Lastly, saves the tweets in .txt files. 
-    """
-    api = TwitterClient() # creating object of TwitterClient Class
-    bitcoint_tweets = api.get_tweets('Bitcoin') # fetches tweets from @Bitcoin
-    ripple_tweets = api.get_tweets('Ripple') # fetches tweets from @Ripple
-    eth_tweets = api.get_tweets('ethereumproject') #fetches tweets from ethereum
-    influential_person = api.get_tweets('bgarlinghouse') #fetches tweets from @bgarlinghouse
+        tweets = []
 
-    def print_totals(tweets):
+        try:
+            fetched_tweets = self.api.search(q = query, count = count)
+            
+            for tweet in fetched_tweets:
+                parsed_tweet = {}  # Dictionary stores tweet's text and sent
+                parsed_tweet['text'] = self.clean_tweet(tweet.text)
+                parsed_tweet['sentiment'] = self.get_tweet_sentiment(tweet.text)
+
+                if tweet.retweet_count > 0:  # Add retweets not in tweets dic
+                    if parsed_tweet not in tweets:  
+                        tweets.append(parsed_tweet) 
+                else:
+                    tweets.append(parsed_tweet)
+            
+            return tweets
+        
+        except tweepy.TweepError as e:
+            print("Error : " + str(e))
+
+    def get_ratio_counts(self, tweets):
         pos_lis, neg_lis, neu_lis = [], [], []
         pos_count, neg_count, neu_count, total_count = 0, 0, 0, 0
        
@@ -116,7 +139,7 @@ def main():
                 neu_count += 1
                 total_count += 1
 
-        print("Total number of tweets and retweets: " + str(total_count))
+        print("Total number of tweets and retweets:"  + str(total_count))
         print("\033[0;32;47mNumber of positive tweets and retweets: " + str(pos_count))
         print("\033[1;33;40mNumber of neutral tweets and retweets: " + str(neu_count))
         print("\033[0;31;47mNumber of negative tweets and retweets: " + str(neg_count))
@@ -124,34 +147,29 @@ def main():
         if neg_count != 0:
             ratio = pos_count / neg_count
             print("\033[0;34;47mPositive to negative ratio: " + str(format(ratio, '.2f')) + "\n")
-        """
-        with open("pos_tweets.txt", "w", encoding='utf-8', errors='ignore') as p_tweet:
-            for tweet in pos_lis:
-                p_tweet.write(str(tweet['text']) + "\n")
+            return ratio # ratio to be used for ranking algorithm
+        else:
+            return 1
+        
+def main():
+    """
+    Instantiates twitter client, retrieves tweets, categorizes tweets into 
+    positive, neutral, or negative lists. Optional to print tweets from each 
+    list. Lastly, saves the tweets in .txt files. 
+    output bench"""
+    api = TwitterClient() # creating object of TwitterClient Class
+    bitcoint_tweets = api.get_tweets_user('Bitcoin') # fetches tweets from @Bitcoin
+    ripple_tweets = api.get_tweets_user('Ripple') # fetches tweets from @Ripple
+    eth_tweets = api.get_tweets_user('ethereumproject') #fetches tweets from ethereum
+    influential_person = api.get_tweets_user('bgarlinghouse') #fetches tweets from @bgarlinghouse
+    twitter_feed = api.get_tweet_feed('Bitcoin', 100)
 
-        with open("neg_tweets.txt", "w", encoding='utf-8', errors='ignore') as n_tweet:
-            for tweet in neg_lis:
-                n_tweet.write(str(tweet['text']) + "\n")
-
-        with open("neu_tweets", "w", encoding='utf-8', errors='ignore') as neu_tweet:
-            for tweet in neu_lis:
-                neu_tweet.write(str(tweet['text']) + "\n")
-
-        for tweet in pos_lis:
-            print("\033[0;32;47mTweet: " + tweet['text'] + "\nSentiment:  " + str(tweet['sentiment']) + "\n")
+    api.get_ratio_counts(bitcoint_tweets)
+    api.get_ratio_counts(ripple_tweets)
+    api.get_ratio_counts(eth_tweets)
+    api.get_ratio_counts(influential_person)
+    api.get_ratio_counts(twitter_feed)
     
-        for tweet in neg_lis:
-            print("\033[0;31;47mTweet: " + tweet['text'] + "\nSentiment:  " + str(tweet['sentiment']) + "\n")
-    
-        for tweet in neu_lis:
-            print("\033[1;33;40mTweet: " + tweet['text'] + "\nSentiment:  " + str(tweet['sentiment']) + "\n")
-        """
-
-    print_totals(bitcoint_tweets)
-    print_totals(ripple_tweets)
-    print_totals(eth_tweets)
-    print_totals(influential_person)
-
 if __name__ == "__main__":
     # calling main function
     main()
