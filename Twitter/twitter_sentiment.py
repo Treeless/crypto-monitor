@@ -17,14 +17,8 @@ import nltk nltk.download()
     - install all the packages within the window that pops up.
 
 TODO:
-- Find a way to remove retweets. Should we remove retweets? Who should we 
+- Should we remove retweets? Who should we 
 follow?
-
-- Find a way to monitor multiple twitter accounts.
-    - As of right now, the get_tweets method in the TwitterClient class is
-    set to follow @Bitcoin by default. We should find at least five accounts
-    to follow and analyze. These accounts will later be ranked, perhaps
-    begin coding a sorting algorithm / searching for an algorithm online.
 
 - Graphs numpy/matplotlab
 
@@ -66,7 +60,7 @@ class TwitterClient(object):
 
         return result['compound']
 
-    def get_tweets(self):
+    def get_tweets(self, id):
         """ Returns list of most recent tweets andfrom a Twitter account.
         
         Uses get_tweet_sentiment in order to store tweet sentiment.
@@ -74,7 +68,7 @@ class TwitterClient(object):
         tweets = [] #  list that stores twitter statuses
         
         try:
-            fetched_tweets = self.api.user_timeline(id = 'Bitcoin', count = 3200) # fetches tweet from USER
+            fetched_tweets = self.api.user_timeline(id = id, include_rts = 'false', count = 3200) # fetches tweet from USER
             
             for tweet in fetched_tweets:
                 parsed_tweet = {}  # Dictionary stores tweet's text and sent
@@ -99,58 +93,64 @@ def main():
     list. Lastly, saves the tweets in .txt files. 
     """
     api = TwitterClient() # creating object of TwitterClient Class
-    tweets = api.get_tweets() # fetches tweets from twitter account
-    pos_count, neu_count, neg_count, total_count = 0, 0, 0, 0
-    pos_lis, neg_lis, neu_lis = [], [], []
-    
-    # For loops categorizes tweets based off of sentiment. 
-    for tweet in tweets:
-        if tweet['sentiment'] > 0.4:
-            pos_lis.append(tweet)
-            pos_count += 1
-            total_count += 1
-        elif tweet['sentiment'] < -0.4:
-            neg_lis.append(tweet)
-            neg_count += 1
-            total_count += 1
-        else:
-            neu_lis.append(tweet)
-            neu_count += 1
-            total_count += 1
-    
-    if neg_count != 0:
-        ratio = pos_count / neg_count
-        # format(ratio, '.2f')
+    bitcoint_tweets = api.get_tweets('Bitcoin') # fetches tweets from @Bitcoin
+    ripple_tweets = api.get_tweets('Ripple') # fetches tweets from @Ripple
+    eth_tweets = api.get_tweets('ethereumproject') #fetches tweets from ethereum
+    influential_person = api.get_tweets('bgarlinghouse') #fetches tweets from @bgarlinghouse
 
-    print("Total number of tweets and retweets: " + str(total_count))
-    print("\033[0;32;47mNumber of positive tweets and retweets: " + str(pos_count))
-    print("\033[1;33;40mNumber of neutral tweets and retweets: " + str(neu_count))
-    print("\033[0;31;47mNumber of negative tweets and retweets: " + str(neg_count) + "\n")
-    print("\033[0;34;47mPositive to negative ratio: " + str(format(ratio, '.2f')))
+    def print_totals(tweets):
+        pos_lis, neg_lis, neu_lis = [], [], []
+        pos_count, neg_count, neu_count, total_count = 0, 0, 0, 0
+       
+        for tweet in tweets: # For loops categorizes tweets based off of sentiment.
+            if tweet['sentiment'] > 0.4:
+                pos_lis.append(tweet)
+                pos_count += 1
+                total_count += 1
+            elif tweet['sentiment'] < -0.4:
+                neg_lis.append(tweet)
+                neg_count += 1
+                total_count += 1
+            else:
+                neu_lis.append(tweet)
+                neu_count += 1
+                total_count += 1
 
-    # Remove comments if you want the console to print the tweets!
-    """for tweet in pos_lis:
-        print("\033[0;32;47mTweet: " + tweet['text'] + "\nSentiment:  " + str(tweet['sentiment']) + "\n")
-    
-    for tweet in neg_lis:
-        print("\033[0;31;47mTweet: " + tweet['text'] + "\nSentiment:  " + str(tweet['sentiment']) + "\n")
-    
-    for tweet in neu_lis:
-        print("\033[1;33;40mTweet: " + tweet['text'] + "\nSentiment:  " + str(tweet['sentiment']) + "\n")
-    """
+        print("Total number of tweets and retweets: " + str(total_count))
+        print("\033[0;32;47mNumber of positive tweets and retweets: " + str(pos_count))
+        print("\033[1;33;40mNumber of neutral tweets and retweets: " + str(neu_count))
+        print("\033[0;31;47mNumber of negative tweets and retweets: " + str(neg_count))
 
-    # Creates three .txts files to write the neg, pos, and neu tweets
-    with open("pos_tweets.txt", "w", encoding='utf-8', errors='ignore') as p_tweet:
+        if neg_count != 0:
+            ratio = pos_count / neg_count
+            print("\033[0;34;47mPositive to negative ratio: " + str(format(ratio, '.2f')) + "\n")
+        """
+        with open("pos_tweets.txt", "w", encoding='utf-8', errors='ignore') as p_tweet:
+            for tweet in pos_lis:
+                p_tweet.write(str(tweet['text']) + "\n")
+
+        with open("neg_tweets.txt", "w", encoding='utf-8', errors='ignore') as n_tweet:
+            for tweet in neg_lis:
+                n_tweet.write(str(tweet['text']) + "\n")
+
+        with open("neu_tweets", "w", encoding='utf-8', errors='ignore') as neu_tweet:
+            for tweet in neu_lis:
+                neu_tweet.write(str(tweet['text']) + "\n")
+
         for tweet in pos_lis:
-            p_tweet.write(str(tweet['text']) + "\n")
-
-    with open("neg_tweets.txt", "w", encoding='utf-8', errors='ignore') as n_tweet:
+            print("\033[0;32;47mTweet: " + tweet['text'] + "\nSentiment:  " + str(tweet['sentiment']) + "\n")
+    
         for tweet in neg_lis:
-            n_tweet.write(str(tweet['text']) + "\n")
-
-    with open("neu_tweets", "w", encoding='utf-8', errors='ignore') as neu_tweet:
+            print("\033[0;31;47mTweet: " + tweet['text'] + "\nSentiment:  " + str(tweet['sentiment']) + "\n")
+    
         for tweet in neu_lis:
-            neu_tweet.write(str(tweet['text']) + "\n")
+            print("\033[1;33;40mTweet: " + tweet['text'] + "\nSentiment:  " + str(tweet['sentiment']) + "\n")
+        """
+
+    print_totals(bitcoint_tweets)
+    print_totals(ripple_tweets)
+    print_totals(eth_tweets)
+    print_totals(influential_person)
 
 if __name__ == "__main__":
     # calling main function
