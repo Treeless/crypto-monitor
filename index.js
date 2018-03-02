@@ -30,6 +30,22 @@
     });
   });
 
+  app.get("/current-bitcoin-price", function(req, res) {
+    var spawn = require("child_process").spawn;
+    var pythonProcess = spawn('python', [Config.smsa_repo + "/interfaces/prices.py", "now"]);
+
+    pythonProcess.stdout.on('data', function(data) {
+
+      // On output (our data)
+      data = JSON.parse(data.toString('utf-8'));
+      res.json(data);
+    });
+
+    pythonProcess.stderr.on('data', function(data){
+      console.log(data.toString('utf-8'));
+    });
+  })
+
   app.listen('80', function() {
     console.log(Chalk.yellow("App listening on port: 80"));
 
@@ -92,7 +108,6 @@
         });
         fs.writeFileSync(__dirname + "/data/dates.json", JSON.stringify({ start: moment(dates[0]).format("YYYY-MM-DD"), end: moment(dates[dates.length - 1]).format("YYYY-MM-DD") }));
       });
-
   });
 
 

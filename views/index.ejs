@@ -201,6 +201,22 @@
     });
   });
   </script>
+  <script>
+  var processing = false;
+  var interval = setInterval(function() {
+    console.log("do");
+    if (!processing)
+      processing = true;
+    else
+      return
+    $.getJSON("/current-bitcoin-price", function(priceData) {
+      console.log("current-bitcoin-price", priceData);
+
+      $('#bitcoin-price').html("$"+priceData.price.toLocaleString())
+      processing = false;
+    });
+  }, 1000);
+  </script>
   <link href="/css/main.css" rel="stylesheet" type="text/css" />
 </head>
 
@@ -216,6 +232,10 @@
         <li><a href="http://www.github.com/Treeless/Bitsense">Github: Twitter Bot</a></li>
         <li><a href="http://www.github.com/MichaelDragan/Smsa">Github: Prediction Model</a></li>
       </ul>
+    </div>
+    <div class="center">
+      Realtime BTC:
+      <span id="bitcoin-price">'Loading'</span> USD
     </div>
   </header>
   <div id="main-container">
