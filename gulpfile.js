@@ -14,15 +14,15 @@
 
   gulp.task('unit', [], function() {
     var self = this;
-    gulp.src(['tests/**/*.spec.js'], { read: false })
-      .pipe(mocha({
-        "debugBrk": DEBUG,
-        'r': "tests/setup.js",
-        "R": 'spec', //|| 'nyan'
-        "istanbul": true
-      })).on("error", function(err) {
-        self.emit('done');
-      })
+    // gulp.src(['tests/**/*.spec.js'], { read: false })
+    //   .pipe(mocha({
+    //     "debugBrk": DEBUG,
+    //     'r': "tests/setup.js",
+    //     "R": 'spec', //|| 'nyan'
+    //     "istanbul": true
+    //   })).on("error", function(err) {
+    //     self.emit('done');
+    //   })
   });
 
   gulp.task('watch-js', function() {

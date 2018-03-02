@@ -7,7 +7,8 @@
       "database": "crypto",
       "port": 27017
     },
-    "JWT_SECRET": "03c9b95e2d259ed09683b26ea147436adb01cf98d24aadb0bae0e5ffe39002fe" 
+    "JWT_SECRET": "03c9b95e2d259ed09683b26ea147436adb01cf98d24aadb0bae0e5ffe39002fe",
+    "smsa_repo": "c:/dev/smsa"
   },
   "production":
   {

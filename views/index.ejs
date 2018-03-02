@@ -1,43 +1,72 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" lang="en" />
-    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-    <script src="https://code.highcharts.com/stock/highstock.js"></script>
-    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
-    <script>
-    $.getJSON('/btc/price-history', function (json) {
-      console.log(json.data);
 
-        // Create the chart
-        Highcharts.stockChart('chart-div', {
-            rangeSelector: {
-                selected: 1
-            },
+<head>
+  <meta charset="utf-8" lang="en" />
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+  <script src="https://code.highcharts.com/stock/highstock.js"></script>
+  <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+  <script src="js/moment.js"></script>
+  <script>
+  $.getJSON('/btc/price-history', function(json) {
 
-            title: {
-                text: 'Bitcoin Historical Price'
-            },
+    $.getJSON('/dates.json', function(dates) {
+      console.log(dates);
 
-            series: [{
-                name: 'Bitcoin',
-                data: json.data,
-                tooltip: {
-                    valueDecimals: 2
-                }
-            }]
-        });
+      // Create the chart
+      var chart = Highcharts.stockChart('prices-chart-div', {
+        rangeSelector: {
+          selected: 1
+        },
+
+        title: {
+          text: 'Bitcoin Prices '
+        },
+
+        xAxis: {
+          plotBands: [{ // mark the weekend
+            color: '#FCFFC5',
+            from: new Date(dates.start),
+            to: new Date(dates.end)
+          }],
+          tickInterval: 24 * 3600 * 1000, // one day
+          type: 'datetime'
+        },
+
+        series: [{
+          name: 'Bitcoin Price',
+          data: json.data,
+          tooltip: {
+            valueDecimals: 2
+          }
+        }]
+      });
+
+      chart.xAxis[0].setExtremes(moment(dates.start).valueOf(), moment(dates.end).valueOf());
+      chart.showResetZoom();
     });
+  });
+  </script>
+  <link href="/css/main.css" rel="stylesheet" type="text/css" />
+</head>
 
-    </script>
-  </head>
-  <body>
-    <header>
-      <h1><%= title %></h1>
-    </header>
-    <div class="container">
-      <p>Question: Are we going to use bootstrap??</p>
-      <div id="chart-div"></div>
+<body>
+  <header>
+    <div id="crypto-sense-logo-container">
+      <img src="crypto-sense-header.png" />
     </div>
-  </body>
+    <div id="links-container">
+      <ul>
+        <li><a href="http://www.twitter.com/cryptosensebot">@CryptoSenseBot</a></li>
+        <li><a href="http://www.github.com/Treeless/crypto-monitor">Github: Website</a></li>
+        <li><a href="http://www.github.com/Treeless/Bitsense">Github: Twitter Bot</a></li>
+        <li><a href="http://www.github.com/MichaelDragan/Smsa">Github: Prediction Model</a></li>
+      </ul>
+    </div>
+  </header>
+  <div class="main-container">
+    <div id="prices-chart-div"></div>
+  </div>
+</body>
+
 </html>

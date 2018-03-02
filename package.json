@@ -31,8 +31,10 @@
   "dependencies": {
     "body-parser": "^1.18.2",
     "chalk": "^2.3.0",
+    "csv-parser": "^1.12.0",
     "ejs": "^2.5.7",
     "express": "^4.16.2",
+    "gulp-sass": "^3.1.0",
     "moment": "^2.19.1",
     "mongoose": "^4.12.4",
     "request": "^2.83.0"
@@ -46,7 +48,6 @@
     "gulp-concat": "^2.6.1",
     "gulp-cssnano": "^2.1.2",
     "gulp-nodemon": "^2.2.1",
-    "gulp-sass": "^3.1.0",
     "gulp-spawn-mocha": "^3.3.1",
     "gulp-util": "^3.0.8",
     "istanbul": "^0.4.5",
