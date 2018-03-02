@@ -24,10 +24,30 @@
 
   //Main homepage view route
   app.get('/', function(req, res) {
-    console.log("HOMEPAGE");
-    res.render("index.ejs", {
-      title: "MAIN PAGE"
-    });
+    var dates = JSON.parse(fs.readFileSync(__dirname + "/data/dates.json"));
+
+    Mongoose.connection.db.collection('influencers').find({
+      "tweets": {
+        $elemMatch: { "$and": [{ "dateRaw": { "$gte": new Date(dates.start) } }, { "dateRaw": { "$lte": new Date(dates.end) } }] }
+      }
+    }).sort({ followers: -1 }).limit(10).toArray(function(err, influencers) {
+      if (err) {
+        console.log(err);
+        return res.send("MONGODB ERROR. AAAAAAAAHHHH..." + err)
+      }
+      var topTweets = [];
+      for (var i = 0; i < influencers.length; i++) {
+        var influencer = influencers[i];
+        topTweets.push(Object.assign({ accountName: influencer.accountName }, influencer.tweets[0]));
+      }
+
+      console.log("HOMEPAGE");
+      res.render("index.ejs", {
+        title: "MAIN PAGE",
+        influencers: influencers,
+        topTweets: topTweets
+      });
+    })
   });
 
   app.get("/current-bitcoin-price", function(req, res) {
@@ -41,7 +61,7 @@
       res.json(data);
     });
 
-    pythonProcess.stderr.on('data', function(data){
+    pythonProcess.stderr.on('data', function(data) {
       console.log(data.toString('utf-8'));
     });
   })
