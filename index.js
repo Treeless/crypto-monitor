@@ -11,7 +11,8 @@
     PriceManager = require('./lib/price_manager.lib.js'),
     moment = require('moment'),
     fs = require('fs'),
-    csv = require('csv-parser');
+    csv = require('csv-parser'),
+    lodash = require('lodash');
 
   let app = new Express();
 
@@ -29,48 +30,67 @@
     });
   });
 
-  //API route for retrieving the bitcoin price
-  app.get('/btc/price-history', function(req, res) {
-    var manager = new PriceManager().bitcoinHistoricalBulkRetrieval()
-      .then(function(result) {
-        var json = JSON.parse(result);
-        //Format time...
-        var keys = Object.keys(json.bpi); //all the dates
-        var formatted = []; //where the formatted data will be placed in
-        for (var i = 0; i < keys.length; i++) {
-          var date = keys[i];
-          var price = json.bpi[date];
-
-          //Format the date to unix timestamp
-          var ts = moment(date).valueOf();
-          formatted.push([ts, price]);
-        }
-
-        res.json({ data: formatted });
-      }, function(err) {
-        res.json({ error: err });
-      });
-  });
-
   app.listen('80', function() {
     console.log(Chalk.yellow("App listening on port: 80"));
 
     //Get the CSV from the SMSA repo
     console.log("GET CSV from Smsa repo..")
+    var row = [];
     var dates = [];
     fs.createReadStream(Config.smsa_repo + "/data/tweets.csv")
       .pipe(csv())
       .on('data', function(data) {
+        var dateArr = data.date.split(" ");
+        dates.push(moment(dateArr[0]).set('hour', dateArr[1]));
+        row.push(data);
 
-        dates.push(new Date(data.date.split(" ")[0]));
       })
       .on('end', function() {
-        console.log("DONE");
+
+        var prices = [];
+        var foo = lodash.map(row, 'price');
+        for (var i = 0; i < foo.length; i++) {
+          prices.push([moment(dates[i]).valueOf(), parseFloat(foo[i])])
+        }
+
+        //consolidate each piece of JSON
+        var pch1hr = [];
+        var foo = lodash.map(row, 'percent_change_1h');
+        for (var i = 0; i < foo.length; i++) {
+          pch1hr.push([moment(dates[i]).valueOf(), parseFloat(foo[i])])
+        }
+
+        var pch24hr = [];
+        foo = lodash.map(row, 'percent_change_24h');
+        for (i = 0; i < foo.length; i++) {
+          pch24hr.push([moment(dates[i]).valueOf(), parseFloat(foo[i])])
+        }
+
+        var pch7d = [];
+        foo = lodash.map(row, 'percent_change_7d');
+        for (i = 0; i < foo.length; i++) {
+          pch7d.push([moment(dates[i]).valueOf(), parseFloat(foo[i])])
+        }
+
+        var tbpol = [];
+        foo = lodash.map(row, 'tb_polarity');
+        for (i = 0; i < foo.length; i++) {
+          tbpol.push([moment(dates[i]).valueOf(), parseFloat(foo[i])])
+        }
+
+        var vader = [];
+        foo = lodash.map(row, 'vader_polarity');
+        for (i = 0; i < foo.length; i++) {
+          vader.push([moment(dates[i]).valueOf(), parseFloat(foo[i])])
+        }
+
+        fs.writeFileSync(__dirname + "/data/charts.json", JSON.stringify({ prices: prices, pch1hr: pch1hr, pch24hr: pch24hr, pch7d: pch7d, tbpol: tbpol, vader: vader }));
+
+        // Get dates for front end to focus on
         dates.sort(function(left, right) {
           return moment.utc(left.timeStamp).diff(moment.utc(right.timeStamp))
         });
-
-        fs.writeFileSync(__dirname+"/data/dates.json",  JSON.stringify({start:moment(dates[0]).format("YYYY-MM-DD"), end: moment(dates[dates.length-1]).format("YYYY-MM-DD") }));
+        fs.writeFileSync(__dirname + "/data/dates.json", JSON.stringify({ start: moment(dates[0]).format("YYYY-MM-DD"), end: moment(dates[dates.length - 1]).format("YYYY-MM-DD") }));
       });
 
   });

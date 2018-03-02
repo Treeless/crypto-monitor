@@ -4,11 +4,19 @@ header {
   border-radius: 30px;
 }
 
-#prices-chart-div{
+#main-container .chart {
+  width: 75%;
+  height: 250px;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#main-container #prices-chart-div {
   width: 75%;
   max-width: 1000px;
-  margin-left:auto;
-  margin-right:auto;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 #crypto-sense-logo-container img {

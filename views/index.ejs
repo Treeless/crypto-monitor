@@ -8,42 +8,196 @@
   <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
   <script src="js/moment.js"></script>
   <script>
-  $.getJSON('/btc/price-history', function(json) {
+  $.getJSON('/dates.json', function(dates) {
 
-    $.getJSON('/dates.json', function(dates) {
-      console.log(dates);
 
-      // Create the chart
-      var chart = Highcharts.stockChart('prices-chart-div', {
-        rangeSelector: {
-          selected: 1
-        },
+    $.getJSON('/charts.json', function(chartData) {
 
-        title: {
-          text: 'Bitcoin Prices '
-        },
+      $('#main-container').bind('mousemove touchmove touchstart', function(e) {
+        var chart,
+          point,
+          i,
+          event;
 
+        for (i = 0; i < Highcharts.charts.length; i = i + 1) {
+          chart = Highcharts.charts[i];
+          // Find coordinates within the chart
+          event = chart.pointer.normalize(e.originalEvent);
+          // Get the hovered point
+          point = chart.series[0].searchPoint(event, true);
+
+          if (point) {
+            point.highlight(e);
+          }
+        }
+      });
+      /**
+       * Override the reset function, we don't need to hide the tooltips and
+       * crosshairs.
+       */
+      Highcharts.Pointer.prototype.reset = function() {
+        return undefined;
+      };
+
+      /**
+       * Highlight a point by showing tooltip, setting hover state and draw crosshair
+       */
+      Highcharts.Point.prototype.highlight = function(event) {
+        event = this.series.chart.pointer.normalize(event);
+        this.onMouseOver(); // Show the hover marker
+        this.series.chart.tooltip.refresh(this); // Show the tooltip
+        this.series.chart.xAxis[0].drawCrosshair(event, this); // Show the crosshair
+      };
+
+      /**
+       * Synchronize zooming through the setExtremes event handler.
+       */
+      function syncExtremes(e) {
+        var thisChart = this.chart;
+
+        if (e.trigger !== 'syncExtremes') { // Prevent feedback loop
+          Highcharts.each(Highcharts.charts, function(chart) {
+            if (chart !== thisChart) {
+              if (chart.xAxis[0].setExtremes) { // It is null while updating
+                chart.xAxis[0].setExtremes(
+                  e.min,
+                  e.max,
+                  undefined,
+                  false, { trigger: 'syncExtremes' }
+                );
+              }
+            }
+          });
+        }
+      }
+
+      //MAIN PRICES CHART
+      var chart = Highcharts.chart('prices-chart-div', {
         xAxis: {
-          plotBands: [{ // mark the weekend
-            color: '#FCFFC5',
-            from: new Date(dates.start),
-            to: new Date(dates.end)
-          }],
-          tickInterval: 24 * 3600 * 1000, // one day
           type: 'datetime'
         },
-
+        plotOptions: {
+          line: {
+            marker: {
+              enabled: false
+            }
+          }
+        },
+        title: {
+          text: 'Price of Bitcoin'
+        },
+        exporting: { enabled: false },
         series: [{
-          name: 'Bitcoin Price',
-          data: json.data,
+          name: 'USD Price',
+          data: chartData.prices,
           tooltip: {
             valueDecimals: 2
           }
         }]
       });
 
-      chart.xAxis[0].setExtremes(moment(dates.start).valueOf(), moment(dates.end).valueOf());
-      chart.showResetZoom();
+      //SENTIMENT CHARTS
+      chart = Highcharts.chart('tbpolarity-chart-div', {
+        xAxis: {
+          type: 'datetime'
+        },
+        yAxis: { allowDecimals: Boolean },
+        plotOptions: {
+          line: {
+            marker: {
+              enabled: false
+            }
+          }
+        },
+        title: {
+          text: 'Sentiment: TextBlob'
+        },
+        exporting: { enabled: false },
+        series: [{
+          name: "polarity",
+          data: chartData.tbpol,
+          tooltip: {
+            valueDecimals: 4
+          }
+        }]
+      });
+
+      chart = Highcharts.chart('vader-chart-div', {
+        xAxis: {
+          type: 'datetime'
+        },
+        plotOptions: {
+          line: {
+            marker: {
+              enabled: false
+            }
+          }
+        },
+        yAxis: {
+          allowDecimals: Boolean
+        },
+        title: {
+          text: 'Sentiment: Vader'
+        },
+        exporting: { enabled: false },
+        series: [{
+          name: 'Polarity',
+          data: chartData.vader,
+          tooltip: {
+            valueDecimals: 4
+          }
+        }]
+      });
+
+      //Percent changes in price charts
+      chart = Highcharts.chart('pch1hr-chart-div', {
+        xAxis: {
+          type: 'datetime'
+        },
+        plotOptions: {
+          line: {
+            marker: {
+              enabled: false
+            }
+          }
+        },
+        title: {
+          text: 'Percent Change Price: 1 HR'
+        },
+        exporting: { enabled: false },
+        series: [{
+          name: 'Percent',
+          data: chartData.pch1hr,
+          tooltip: {
+            valueDecimals: 2
+          }
+        }]
+      });
+
+      chart = Highcharts.chart('pch24hr-chart-div', {
+        xAxis: {
+          type: 'datetime'
+        },
+        plotOptions: {
+          line: {
+            marker: {
+              enabled: false
+            }
+          }
+        },
+        title: {
+          text: 'Percent Change Price: 24HR'
+        },
+        exporting: { enabled: false },
+        series: [{
+          name: 'Percent',
+          data: chartData.pch24hr,
+          tooltip: {
+            valueDecimals: 2
+          }
+        }]
+      });
+
     });
   });
   </script>
@@ -64,8 +218,12 @@
       </ul>
     </div>
   </header>
-  <div class="main-container">
+  <div id="main-container">
     <div id="prices-chart-div"></div>
+    <div id="tbpolarity-chart-div" class="chart"></div>
+    <div id="vader-chart-div" class="chart"></div>
+    <div id="pch1hr-chart-div" class="chart"></div>
+    <div id="pch24hr-chart-div" class="chart"></div>
   </div>
 </body>
 
