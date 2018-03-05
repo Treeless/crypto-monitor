@@ -41,11 +41,17 @@
         topTweets.push(Object.assign({ accountName: influencer.accountName }, influencer.tweets[0]));
       }
 
-      console.log("HOMEPAGE");
+      //GET THE PREDICTION FROM SMSA
+      // Should be stored in mongo
+      // TODO.
+      var predictedPrice = { date: moment().format("YYYY-MM-DD"), price: 11000 };
+
+
       res.render("index.ejs", {
         title: "MAIN PAGE",
         influencers: influencers,
-        topTweets: topTweets
+        topTweets: topTweets,
+        predictedPrice: predictedPrice
       });
     })
   });
