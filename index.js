@@ -24,8 +24,12 @@
 
   //Main homepage view route
   app.get('/', function(req, res) {
-    var dates = JSON.parse(fs.readFileSync(__dirname + "/data/dates.json"));
+    //Make the date we show to be the last week.
+    var dates = { start: moment().startOf('week').toDate(), end: moment().endOf('day').toDate() }
 
+    var chartedInfluencerData = [];
+
+    //Find all the influencers that have tweets between our two dates
     Mongoose.connection.db.collection('influencers').find({
       "tweets": {
         $elemMatch: { "$and": [{ "dateRaw": { "$gte": new Date(dates.start) } }, { "dateRaw": { "$lte": new Date(dates.end) } }] }
@@ -35,24 +39,61 @@
         console.log(err);
         return res.send("MONGODB ERROR. AAAAAAAAHHHH..." + err)
       }
+
+      //Get the top tweets from each influencer we have this week
+      // Also, format some data so we can plot on the bitcoin price chart
       var topTweets = [];
       for (var i = 0; i < influencers.length; i++) {
         var influencer = influencers[i];
+        for (var j = 0; j < influencer.tweets.length; j++) {
+          var tweet = influencer.tweets[j]
+          //[timestamp, tweet]
+          chartedInfluencerData.push([moment(tweet.dateRaw).valueOf(), tweet.text])
+        }
+
         topTweets.push(Object.assign({ accountName: influencer.accountName }, influencer.tweets[0]));
       }
 
-      //GET THE PREDICTION FROM SMSA
-      // Should be stored in mongo
-      // TODO.
-      var predictedPrice = { date: moment().format("YYYY-MM-DD"), price: 11000 };
+      //GET THE sentiment and price data outputted by the SMSA repo
+      // Ex: { "_id" : ObjectId("5aa19fbe46b3c33ce4e5c4f2"), "symbol" : "BTC", 
+      //  "date" : ISODate("2018-03-08T20:40:30.631Z"), "tweet_count" : "792", 
+      //  "timestamp" : "1520557200.0", "tb_polarity" : "0.1523370823433956",
+      //  "vader_polarity" : "0.21940012626262625", "price" : "9404.7" }
+      Mongoose.connection.db.collection("live_tweets_sent")
+        .find({ "$and": [{ "date": { "$gte": new Date(dates.start) } }, { "date": { "$lte": new Date(dates.end) } }] })
+        .toArray(function(err, output) {
+          if (err) {
+            console.log("error getting live_tweets_sent", err)
+          } else {
+
+            //Get the values
+            let formattedData = {}
+
+            formattedData.tweet_count = output.map(a => [moment(a.date).valueOf(), parseInt(a.tweet_count)]);
+            formattedData.tbpol = output.map(a => [moment(a.date).valueOf(), parseFloat(a.tb_polarity)]);
+            formattedData.vader = output.map(a => [moment(a.date).valueOf(), parseFloat(a.vader_polarity)]);
+            formattedData.prices = output.map(a => [moment(a.date).valueOf(), parseFloat(a.price)]);
+
+            console.log(formattedData)
 
 
-      res.render("index.ejs", {
-        title: "MAIN PAGE",
-        influencers: influencers,
-        topTweets: topTweets,
-        predictedPrice: predictedPrice
-      });
+            //GET THE PREDICTION FROM SMSA
+            // Should be stored in mongo
+            // TODO. Waiting on nakul's stuff
+            var predictedPrice = { date: moment().format("YYYY-MM-DD"), price: 11000 };
+
+
+            res.render("index.ejs", {
+              title: "MAIN PAGE",
+              influencers: influencers,
+              chartedInfluencerData: chartedInfluencerData, //Influencer pieces to plot onto the charts
+              topTweets: topTweets,
+              predictedPrice: predictedPrice,
+              chartData: formattedData,
+              dates: dates
+            });
+          }
+        })
     })
   });
 
@@ -74,66 +115,6 @@
 
   app.listen('80', function() {
     console.log(Chalk.yellow("App listening on port: 80"));
-
-    //Get the CSV from the SMSA repo
-    console.log("GET CSV from Smsa repo..")
-    var row = [];
-    var dates = [];
-    fs.createReadStream(Config.smsa_repo + "/data/tweets.csv")
-      .pipe(csv())
-      .on('data', function(data) {
-        var dateArr = data.date.split(" ");
-        dates.push(moment(dateArr[0]).set('hour', dateArr[1]));
-        row.push(data);
-
-      })
-      .on('end', function() {
-
-        var prices = [];
-        var foo = lodash.map(row, 'price');
-        for (var i = 0; i < foo.length; i++) {
-          prices.push([moment(dates[i]).valueOf(), parseFloat(foo[i])])
-        }
-
-        //consolidate each piece of JSON
-        var pch1hr = [];
-        var foo = lodash.map(row, 'percent_change_1h');
-        for (var i = 0; i < foo.length; i++) {
-          pch1hr.push([moment(dates[i]).valueOf(), parseFloat(foo[i])])
-        }
-
-        var pch24hr = [];
-        foo = lodash.map(row, 'percent_change_24h');
-        for (i = 0; i < foo.length; i++) {
-          pch24hr.push([moment(dates[i]).valueOf(), parseFloat(foo[i])])
-        }
-
-        var pch7d = [];
-        foo = lodash.map(row, 'percent_change_7d');
-        for (i = 0; i < foo.length; i++) {
-          pch7d.push([moment(dates[i]).valueOf(), parseFloat(foo[i])])
-        }
-
-        var tbpol = [];
-        foo = lodash.map(row, 'tb_polarity');
-        for (i = 0; i < foo.length; i++) {
-          tbpol.push([moment(dates[i]).valueOf(), parseFloat(foo[i])])
-        }
-
-        var vader = [];
-        foo = lodash.map(row, 'vader_polarity');
-        for (i = 0; i < foo.length; i++) {
-          vader.push([moment(dates[i]).valueOf(), parseFloat(foo[i])])
-        }
-
-        fs.writeFileSync(__dirname + "/data/charts.json", JSON.stringify({ prices: prices, pch1hr: pch1hr, pch24hr: pch24hr, pch7d: pch7d, tbpol: tbpol, vader: vader }));
-
-        // Get dates for front end to focus on
-        dates.sort(function(left, right) {
-          return moment.utc(left.timeStamp).diff(moment.utc(right.timeStamp))
-        });
-        fs.writeFileSync(__dirname + "/data/dates.json", JSON.stringify({ start: moment(dates[0]).format("YYYY-MM-DD"), end: moment(dates[dates.length - 1]).format("YYYY-MM-DD") }));
-      });
   });
 
 
