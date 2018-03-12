@@ -24,6 +24,20 @@
 
   //Main homepage view route
   app.get('/', function(req, res) {
+    var predictions = {
+      "nextHour": {
+        price: 11000,
+        percentage: 13,
+        date: moment().add('hour', 1)
+      },
+      "nextDay": {
+        price: 11500,
+        percentage: 17,
+        date: moment().add('day', 1)
+      }
+    };
+
+
     //Make the date we show to be the last week.
     var dates = { start: moment().startOf('week').toDate(), end: moment().endOf('day').toDate() }
 
@@ -84,13 +98,9 @@
 
 
             res.render("index.ejs", {
-              title: "MAIN PAGE",
-              influencers: influencers,
-              chartedInfluencerData: chartedInfluencerData, //Influencer pieces to plot onto the charts
-              topTweets: topTweets,
-              predictedPrice: predictedPrice,
-              chartData: formattedData,
-              dates: dates
+              chartData: { hourlyPriceOnly: [], hourlyPriceAndSentiment: [], dailyPriceOnly: [], dailyPriceAndSentiment: [] },
+              dates: dates,
+              predictions: predictions
             });
           }
         })

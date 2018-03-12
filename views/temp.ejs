@@ -1,0 +1,297 @@
+<script>
+  $(function() {
+    var dates = <%- JSON.stringify(dates) %>;
+    var chartData = <%- JSON.stringify(chartData) %>;
+
+    console.log("Highchart themes and linking of charts set")
+
+    //MAIN PRICES CHART
+    var chart = Highcharts.chart('prices-chart-div', {
+      xAxis: {
+        type: 'datetime'
+      },
+      plotOptions: {
+        line: {
+          marker: {
+            enabled: false
+          }
+        }
+      },
+      title: {
+        text: 'Price of Bitcoin'
+      },
+      exporting: { enabled: false },
+      series: [{
+        name: 'USD Price',
+        data: chartData.prices,
+        tooltip: {
+          valueDecimals: 2
+        }
+      }]
+    });
+    console.log("charted prices");
+
+    chart = Highcharts.chart('tweetcount-chart-div', {
+      xAxis: {
+        type: 'datetime'
+      },
+      plotOptions: {
+        line: {
+          marker: {
+            enabled: false
+          }
+        }
+      },
+      title: {
+        text: 'Tweets sent'
+      },
+      exporting: { enabled: false },
+      series: [{
+        name: 'Tweets Count',
+        data: chartData.tweet_count,
+        tooltip: {
+          valueDecimals: 0
+        }
+      }]
+    });
+
+
+    //SENTIMENT CHARTS
+    chart = Highcharts.chart('tbpolarity-chart-div', {
+      xAxis: {
+        type: 'datetime'
+      },
+      yAxis: { allowDecimals: Boolean },
+      plotOptions: {
+        line: {
+          marker: {
+            enabled: false
+          }
+        }
+      },
+      title: {
+        text: 'Community Sentiment via TextBlob'
+      },
+      exporting: { enabled: false },
+      series: [{
+        name: "polarity",
+        data: chartData.tbpol,
+        tooltip: {
+          valueDecimals: 4
+        }
+      }]
+    });
+
+    chart = Highcharts.chart('vader-chart-div', {
+      xAxis: {
+        type: 'datetime'
+      },
+      plotOptions: {
+        line: {
+          marker: {
+            enabled: false
+          }
+        }
+      },
+      yAxis: {
+        allowDecimals: Boolean
+      },
+      title: {
+        text: 'Community Sentiment via Vader'
+      },
+      exporting: { enabled: false },
+      series: [{
+        name: 'Polarity',
+        data: chartData.vader,
+        tooltip: {
+          valueDecimals: 4
+        }
+      }]
+    });
+  })
+  </script>
+  <script>
+  // Update the price percent change colors
+  var updateColorsOfPercent = function() {
+    var pchh = $("#percent-change-hour");
+    var pchhv = parseFloat(pchh.html());
+
+    //Percent change 1 hr
+    if (pchhv > 0) {
+      //green
+      pchh.addClass('green-color');
+      pchh.html("+" + pchh.html() + "% <span class='fa fa-arrow-up'></span>") //add a +
+    } else if (pchhv == 0) {
+      pchh.addClass('');
+    } else {
+      //red
+      pchh.addClass('red-color');
+      pchh.html(pchh.html() + "% <span class='fa fa-arrow-down'></span>")
+    }
+
+    //percent change 24 hr
+    var pchtf = $('#percent-change-tf');
+    var pchtfv = parseFloat(pchtf.html());
+    if (pchtfv > 0) {
+      //green
+      pchtf.addClass('green-color');
+      pchtf.html("+" + pchtf.html() + "% <span class='fa fa-arrow-up'></span>") //add a +
+    } else if (pchtfv == 0) {
+      pchtf.addClass('');
+    } else {
+      //red
+      pchtf.addClass('red-color');
+      pchtf.html(pchtf.html() + "% <span class='fa fa-arrow-down'></span>")
+    }
+
+    //percent change 7 d
+
+    var pchsd = $('#percent-change-sd');
+    var pchsdv = parseFloat(pchsd.html());
+    if (pchsdv > 0) {
+      //green
+      pchsd.addClass('green-color');
+      pchsd.html("+" + pchsd.html() + "% <span class='fa fa-arrow-up'></span>") //add a +
+    } else if (pchsdv == 0) {
+      pchsd.addClass('');
+    } else {
+      //red
+      pchsd.addClass('red-color');
+      pchsd.html(pchsd.html() + "% <span class='fa fa-arrow-down'></span>")
+    }
+  }
+  </script>
+  <script>
+  var foo;
+  var processing = false;
+  var interval = setInterval(foo = function() {
+    console.log("do");
+    if (!processing)
+      processing = true;
+    else
+      return
+    $.getJSON("/current-bitcoin-price", function(priceData) {
+      $('#bitcoin-price').html("$" + priceData.price.toLocaleString())
+      $('#percent-change-hour').html(priceData.percent_change_1h);
+      $('#percent-change-tf').html(priceData.percent_change_24h);
+      $('#percent-change-sd').html(priceData.percent_change_7d);
+      updateColorsOfPercent();
+      processing = false;
+    });
+  }, 10000);
+  foo();
+  </script>
+  <script>
+  // HANDLE THE LOGIC FOR THE SELECTED INFLUENCER SENTIMENTS
+  var chartDiv = "#selected-influencer-sentiments";
+  var influencerSeries = []; //Chart data
+
+  var redrawInfluencerSentimentChart = function() {
+    Highcharts.chart(chartDiv, {
+      xAxis: {
+        type: 'datetime'
+      },
+      yAxis: { allowDecimals: Boolean },
+      plotOptions: {
+        line: {
+          marker: {
+            enabled: false
+          }
+        }
+      },
+      title: {
+        text: 'Sentiment: Selected influencers'
+      },
+      exporting: { enabled: false },
+      series: influencerSeries
+    });
+  }
+
+  //BUTTON LOGIC
+  $('#influencerSelectBtn').on('click', function() {
+    var influencer = $('#influencer-input').text();
+
+    $.getJSON('/influencer/' + influencer + "/sentiment", function(err, data) {
+      // Add the data to the series
+      series.push({
+        name: influencer + "sentiment",
+        data: data,
+        tooltip: {
+          valueDecimals: 4
+        }
+      });
+
+      //redraw chart
+    })
+  });
+  </script>
+
+      <div style="display: none;">
+      <div>
+        <h2>Show sentiment for selected influencers:</h2>
+        <div>
+          @
+          <input placeholder="twitterHandle" id="influencer-input" />
+          <button id="influencerSelectBtn">Select</button>
+          <button id="influencerClearBtn">Clear</button>
+          Selected:
+          <ul id="influencersSelected"></ul>
+        </div>
+      </div>
+      <h2>Today's Charts</h2>
+      <div id="prices-chart-div"></div>
+      <div id="tweetcount-chart-div" class="chart"></div>
+      <div id="tbpolarity-chart-div" class="chart"></div>
+      <div id="vader-chart-div" class="chart"></div>
+      <div>
+        <h2> Today's Top influencers</h2>
+        <table id="top-influencers-table">
+          <tr>
+            <th>TwitterHandle</th>
+            <th>followers</th>
+            <th>BTC related tweets</th>
+          </tr>
+          <% for(var i=0; i < influencers.length; i++){ %>
+            <tr>
+              <td>
+                <%= influencers[i].accountName %>
+              </td>
+              <td>
+                <%= influencers[i].followers.toLocaleString() %>
+              </td>
+              <td>
+                <%= influencers[i].tweets.length %>
+              </td>
+            </tr>
+            <% } %>
+        </table>
+        <h2>Top Tweets</h2>
+        <table id="top-influencers-table">
+          <tr>
+            <th>TwitterHandle</th>
+            <th>Sentiment</th>
+            <th>S-Score</th>
+            <th>Tweet</th>
+          </tr>
+          <% for(var i=0; i < topTweets.length; i++){ %>
+            <tr>
+              <td>
+                <%= topTweets[i].accountName %>
+              </td>
+              <td>
+                <%= topTweets[i].sentiment %>
+              </td>
+              <td>
+                <%= topTweets[i].sentimentScore %>
+              </td>
+              <td>
+                <%= topTweets[i].text %>
+              </td>
+              <td>
+                <%= topTweets[i].retweets %>
+              </td>
+            </tr>
+            <% } %>
+        </table>
+      </div>
+    </div>

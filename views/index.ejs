@@ -7,285 +7,15 @@
   <script src="https://code.highcharts.com/stock/highstock.js"></script>
   <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
   <script src="js/moment.js"></script>
-  <script>
+  <script src="js/highchart-theme.js"></script>
+  <script type="text/javascript">
+  // Page logic (note, themes etc, moved to highchart-theme.js)
   $(function() {
-    var dates = <%- JSON.stringify(dates) %>;
-    var chartData = <%- JSON.stringify(chartData) %>;
+    var hourlyWithPriceOnly = "hourly-graph-price-only";
+    var hourlyWithPriceAndSentiment = "hourly-graph-with-sentiment";
 
-    $('#main-container').bind('mousemove touchmove touchstart', function(e) {
-      var chart,
-        point,
-        i,
-        event;
-
-      for (i = 0; i < Highcharts.charts.length; i = i + 1) {
-        chart = Highcharts.charts[i];
-        // Find coordinates within the chart
-        event = chart.pointer.normalize(e.originalEvent);
-        // Get the hovered point
-        point = chart.series[0].searchPoint(event, true);
-
-        if (point) {
-          point.highlight(e);
-        }
-      }
-    });
-    /**
-     * Override the reset function, we don't need to hide the tooltips and
-     * crosshairs.
-     */
-    Highcharts.Pointer.prototype.reset = function() {
-      return undefined;
-    };
-
-    /**
-     * Highlight a point by showing tooltip, setting hover state and draw crosshair
-     */
-    Highcharts.Point.prototype.highlight = function(event) {
-      event = this.series.chart.pointer.normalize(event);
-      this.onMouseOver(); // Show the hover marker
-      this.series.chart.tooltip.refresh(this); // Show the tooltip
-      this.series.chart.xAxis[0].drawCrosshair(event, this); // Show the crosshair
-    };
-
-    /**
-     * Synchronize zooming through the setExtremes event handler.
-     */
-    function syncExtremes(e) {
-      var thisChart = this.chart;
-
-      if (e.trigger !== 'syncExtremes') { // Prevent feedback loop
-        Highcharts.each(Highcharts.charts, function(chart) {
-          if (chart !== thisChart) {
-            if (chart.xAxis[0].setExtremes) { // It is null while updating
-              chart.xAxis[0].setExtremes(
-                e.min,
-                e.max,
-                undefined,
-                false, { trigger: 'syncExtremes' }
-              );
-            }
-          }
-        });
-      }
-    }
-
-    //THEME
-    /**
-     * (c) 2010-2017 Torstein Honsi
-     *
-     * License: www.highcharts.com/license
-     * 
-     * Dark theme for Highcharts JS
-     * @author Torstein Honsi
-     */
-    Highcharts.theme = {
-      colors: ['#2b908f', '#90ee7e', '#f45b5b', '#7798BF', '#aaeeee', '#ff0066',
-        '#eeaaee', '#55BF3B', '#DF5353', '#7798BF', '#aaeeee'
-      ],
-      chart: {
-        backgroundColor: {
-          linearGradient: { x1: 0, y1: 0, x2: 1, y2: 1 },
-          stops: [
-            [0, '#2a2a2b'],
-            [1, '#3e3e40']
-          ]
-        },
-        style: {
-          fontFamily: '\'Unica One\', sans-serif'
-        },
-        plotBorderColor: '#606063'
-      },
-      title: {
-        style: {
-          color: '#E0E0E3',
-          textTransform: 'uppercase',
-          fontSize: '20px'
-        }
-      },
-      subtitle: {
-        style: {
-          color: '#E0E0E3',
-          textTransform: 'uppercase'
-        }
-      },
-      xAxis: {
-        gridLineColor: '#707073',
-        labels: {
-          style: {
-            color: '#E0E0E3'
-          }
-        },
-        lineColor: '#707073',
-        minorGridLineColor: '#505053',
-        tickColor: '#707073',
-        title: {
-          style: {
-            color: '#A0A0A3'
-
-          }
-        }
-      },
-      yAxis: {
-        gridLineColor: '#707073',
-        labels: {
-          style: {
-            color: '#E0E0E3'
-          }
-        },
-        lineColor: '#707073',
-        minorGridLineColor: '#505053',
-        tickColor: '#707073',
-        tickWidth: 1,
-        title: {
-          style: {
-            color: '#A0A0A3'
-          }
-        }
-      },
-      tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.85)',
-        style: {
-          color: '#F0F0F0'
-        }
-      },
-      plotOptions: {
-        series: {
-          dataLabels: {
-            color: '#B0B0B3'
-          },
-          marker: {
-            lineColor: '#333'
-          }
-        },
-        boxplot: {
-          fillColor: '#505053'
-        },
-        candlestick: {
-          lineColor: 'white'
-        },
-        errorbar: {
-          color: 'white'
-        }
-      },
-      legend: {
-        itemStyle: {
-          color: '#E0E0E3'
-        },
-        itemHoverStyle: {
-          color: '#FFF'
-        },
-        itemHiddenStyle: {
-          color: '#606063'
-        }
-      },
-      credits: {
-        style: {
-          color: '#666'
-        }
-      },
-      labels: {
-        style: {
-          color: '#707073'
-        }
-      },
-
-      drilldown: {
-        activeAxisLabelStyle: {
-          color: '#F0F0F3'
-        },
-        activeDataLabelStyle: {
-          color: '#F0F0F3'
-        }
-      },
-
-      navigation: {
-        buttonOptions: {
-          symbolStroke: '#DDDDDD',
-          theme: {
-            fill: '#505053'
-          }
-        }
-      },
-
-      // scroll charts
-      rangeSelector: {
-        buttonTheme: {
-          fill: '#505053',
-          stroke: '#000000',
-          style: {
-            color: '#CCC'
-          },
-          states: {
-            hover: {
-              fill: '#707073',
-              stroke: '#000000',
-              style: {
-                color: 'white'
-              }
-            },
-            select: {
-              fill: '#000003',
-              stroke: '#000000',
-              style: {
-                color: 'white'
-              }
-            }
-          }
-        },
-        inputBoxBorderColor: '#505053',
-        inputStyle: {
-          backgroundColor: '#333',
-          color: 'silver'
-        },
-        labelStyle: {
-          color: 'silver'
-        }
-      },
-
-      navigator: {
-        handles: {
-          backgroundColor: '#666',
-          borderColor: '#AAA'
-        },
-        outlineColor: '#CCC',
-        maskFill: 'rgba(255,255,255,0.1)',
-        series: {
-          color: '#7798BF',
-          lineColor: '#A6C7ED'
-        },
-        xAxis: {
-          gridLineColor: '#505053'
-        }
-      },
-
-      scrollbar: {
-        barBackgroundColor: '#808083',
-        barBorderColor: '#808083',
-        buttonArrowColor: '#CCC',
-        buttonBackgroundColor: '#606063',
-        buttonBorderColor: '#606063',
-        rifleColor: '#FFF',
-        trackBackgroundColor: '#404043',
-        trackBorderColor: '#404043'
-      },
-
-      // special colors for some of the
-      legendBackgroundColor: 'rgba(0, 0, 0, 0.5)',
-      background2: '#505053',
-      dataLabelsColor: '#B0B0B3',
-      textColor: '#C0C0C0',
-      contrastTextColor: '#F0F0F3',
-      maskColor: 'rgba(255,255,255,0.3)'
-    };
-
-    // Apply the theme
-    Highcharts.setOptions(Highcharts.theme);
-
-    console.log("Highchart themes and linking of charts set")
-
-    //MAIN PRICES CHART
-    var chart = Highcharts.chart('prices-chart-div', {
+    // Chart the hourly (price only)
+    var chart = Highcharts.chart(hourlyWithPriceOnly, {
       xAxis: {
         type: 'datetime'
       },
@@ -297,20 +27,20 @@
         }
       },
       title: {
-        text: 'Price of Bitcoin'
+        text: 'Price of Bitcoin: Hourly [Price only prediction]'
       },
       exporting: { enabled: false },
       series: [{
         name: 'USD Price',
-        data: chartData.prices,
+        data: <%- JSON.stringify(chartData.hourlyPriceOnly) %>,
         tooltip: {
           valueDecimals: 2
         }
       }]
     });
-    console.log("charted prices");
 
-    chart = Highcharts.chart('tweetcount-chart-div', {
+    // Chart hourly (price and sentiment prediction)
+    chart = Highcharts.chart(hourlyWithPriceAndSentiment, {
       xAxis: {
         type: 'datetime'
       },
@@ -322,186 +52,17 @@
         }
       },
       title: {
-        text: 'Tweets sent'
+        text: 'Price of Bitcoin: Hourly [Price & Sentiment Prediction]'
       },
       exporting: { enabled: false },
       series: [{
-        name: 'Tweets Count',
-        data: chartData.tweet_count,
+        name: 'USD Price',
+        data: <%- JSON.stringify(chartData.hourlyPriceAndSentiment) %>,
         tooltip: {
-          valueDecimals: 0
+          valueDecimals: 2
         }
       }]
     });
-
-
-    //SENTIMENT CHARTS
-    chart = Highcharts.chart('tbpolarity-chart-div', {
-      xAxis: {
-        type: 'datetime'
-      },
-      yAxis: { allowDecimals: Boolean },
-      plotOptions: {
-        line: {
-          marker: {
-            enabled: false
-          }
-        }
-      },
-      title: {
-        text: 'Community Sentiment via TextBlob'
-      },
-      exporting: { enabled: false },
-      series: [{
-        name: "polarity",
-        data: chartData.tbpol,
-        tooltip: {
-          valueDecimals: 4
-        }
-      }]
-    });
-
-    chart = Highcharts.chart('vader-chart-div', {
-      xAxis: {
-        type: 'datetime'
-      },
-      plotOptions: {
-        line: {
-          marker: {
-            enabled: false
-          }
-        }
-      },
-      yAxis: {
-        allowDecimals: Boolean
-      },
-      title: {
-        text: 'Community Sentiment via Vader'
-      },
-      exporting: { enabled: false },
-      series: [{
-        name: 'Polarity',
-        data: chartData.vader,
-        tooltip: {
-          valueDecimals: 4
-        }
-      }]
-    });
-  })
-  </script>
-  <script>
-  // Update the price percent change colors
-  var updateColorsOfPercent = function() {
-    var pchh = $("#percent-change-hour");
-    var pchhv = parseFloat(pchh.html());
-
-    //Percent change 1 hr
-    if (pchhv > 0) {
-      //green
-      pchh.addClass('green-color');
-      pchh.html("+" + pchh.html() + "% <span class='fa fa-arrow-up'></span>") //add a +
-    } else if (pchhv == 0) {
-      pchh.addClass('');
-    } else {
-      //red
-      pchh.addClass('red-color');
-      pchh.html(pchh.html() + "% <span class='fa fa-arrow-down'></span>")
-    }
-
-    //percent change 24 hr
-    var pchtf = $('#percent-change-tf');
-    var pchtfv = parseFloat(pchtf.html());
-    if (pchtfv > 0) {
-      //green
-      pchtf.addClass('green-color');
-      pchtf.html("+" + pchtf.html() + "% <span class='fa fa-arrow-up'></span>") //add a +
-    } else if (pchtfv == 0) {
-      pchtf.addClass('');
-    } else {
-      //red
-      pchtf.addClass('red-color');
-      pchtf.html(pchtf.html() + "% <span class='fa fa-arrow-down'></span>")
-    }
-
-    //percent change 7 d
-
-    var pchsd = $('#percent-change-sd');
-    var pchsdv = parseFloat(pchsd.html());
-    if (pchsdv > 0) {
-      //green
-      pchsd.addClass('green-color');
-      pchsd.html("+" + pchsd.html() + "% <span class='fa fa-arrow-up'></span>") //add a +
-    } else if (pchsdv == 0) {
-      pchsd.addClass('');
-    } else {
-      //red
-      pchsd.addClass('red-color');
-      pchsd.html(pchsd.html() + "% <span class='fa fa-arrow-down'></span>")
-    }
-  }
-  </script>
-  <script>
-  var foo;
-  var processing = false;
-  var interval = setInterval(foo = function() {
-    console.log("do");
-    if (!processing)
-      processing = true;
-    else
-      return
-    $.getJSON("/current-bitcoin-price", function(priceData) {
-      $('#bitcoin-price').html("$" + priceData.price.toLocaleString())
-      $('#percent-change-hour').html(priceData.percent_change_1h);
-      $('#percent-change-tf').html(priceData.percent_change_24h);
-      $('#percent-change-sd').html(priceData.percent_change_7d);
-      updateColorsOfPercent();
-      processing = false;
-    });
-  }, 10000);
-  foo();
-  </script>
-  <script>
-  // HANDLE THE LOGIC FOR THE SELECTED INFLUENCER SENTIMENTS
-  var chartDiv = "#selected-influencer-sentiments";
-  var influencerSeries = []; //Chart data
-
-  var redrawInfluencerSentimentChart = function() {
-    Highcharts.chart(chartDiv, {
-      xAxis: {
-        type: 'datetime'
-      },
-      yAxis: { allowDecimals: Boolean },
-      plotOptions: {
-        line: {
-          marker: {
-            enabled: false
-          }
-        }
-      },
-      title: {
-        text: 'Sentiment: Selected influencers'
-      },
-      exporting: { enabled: false },
-      series: influencerSeries
-    });
-  }
-
-  //BUTTON LOGIC
-  $('#influencerSelectBtn').on('click', function() {
-    var influencer = $('#influencer-input').text();
-
-    $.getJSON('/influencer/' + influencer + "/sentiment", function(err, data) {
-      // Add the data to the series
-      series.push({
-        name: influencer + "sentiment",
-        data: data,
-        tooltip: {
-          valueDecimals: 4
-        }
-      });
-
-      //redraw chart
-    })
   });
   </script>
   <link href="/css/main.css" rel="stylesheet" type="text/css" />
@@ -515,17 +76,17 @@
     </div>
     <div id="links-container">
       <ul>
-        <li><a href="http://www.twitter.com/cryptosensebot">@CryptoSenseBot</a></li>
+        <li><a href="http://www.github.com/MichaelDragan/Smsa">Github: Prediction Model</a></li>
         <li><a href="http://www.github.com/Treeless/crypto-monitor">Github: Website</a></li>
         <li><a href="http://www.github.com/Treeless/Bitsense">Github: Twitter Bot</a></li>
-        <li><a href="http://www.github.com/MichaelDragan/Smsa">Github: Prediction Model</a></li>
       </ul>
       <hr>
-      <ul>
-        <li><a href="/coin/btc">Bitcoin (BTC)</a></li>
-        <li><a href="/coin/xrp">Ripple (XRP)</a></li>
-        <li><a href="/coin/eth">Ethereum (ETH)</a></li>
-      </ul>
+      <div id="twitter">
+        <a href="https://twitter.com/cryptosensebot?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @cryptosensebot</a>
+        <br>
+        <small> <span class="fa fa-twitter"></span> 'We tweet our predictions when we make them!'  <span class="fa fa-twitter"></span></small>
+        <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+      </div>
       <hr>
     </div>
     <div class="center">
@@ -545,81 +106,70 @@
     </div>
   </header>
   <div id="main-container">
-    <div>
-      <h2>Prediction For <%= predictedPrice.date %></h2>
-      <div>
-        USD Price close at:
-        <%= "$"+predictedPrice.price.toLocaleString() %>
+    <div id="prediction-type-container">
+      <div class="prediction-inner">
+        <div id="title-container">
+          <span id="title">Next Hour's Prediction</span>
+          <div>
+            <span class="fa fa-clock-o"> <%= predictions.nextHour.date.format("YYYY-MM-DD h:mm a") %></span>
+            <div>
+              <small>(<%= predictions.nextHour.date.fromNow() %>)</small>
+            </div>
+          </div>
+        </div>
+        <div id="prediction-container" class=<%=( (predictions.nextHour.percentage> 0) ? "green-color" : "red-color") %>>
+          <span id="prediction-number">$<%= predictions.nextHour.price.toLocaleString() %></span> | <span id="prediction-percentage-change"><span class='<%= ((predictions.nextHour.percentage > 0) ? "fa fa-arrow-up" : "fa fa-arrow-down") %>'></span>
+          <%= predictions.nextHour.percentage %>%</span>
+        </div>
+      </div>
+      <div class="prediction-inner">
+        <div id="title-container">
+          <span id="title">Next Days's Prediction</span>
+          <div>
+            <span class="fa fa-clock-o"> <%= predictions.nextDay.date.format("YYYY-MM-DD h:mm a") %></span>
+            <div>
+              <small>(<%= predictions.nextDay.date.fromNow() %>)</small>
+            </div>
+          </div>
+        </div>
+        <div id="prediction-container" class=<%=( (predictions.nextDay.percentage> 0) ? "green-color" : "red-color") %>>
+          <span id="prediction-number">$<%= predictions.nextDay.price.toLocaleString() %></span> | <span id="prediction-percentage-change"><span class='<%= ((predictions.nextDay.percentage > 0) ? "fa fa-arrow-up" : "fa fa-arrow-down") %>'></span>
+          <%= predictions.nextDay.percentage %>%</span>
+        </div>
       </div>
     </div>
-    <div>
-      <h2>Show sentiment for selected influencers:</h2>
+    <div id="prediction-graphs-container">
       <div>
-        @
-        <input placeholder="twitterHandle" id="influencer-input" />
-        <button id="influencerSelectBtn">Select</button>
-        <button id="influencerClearBtn">Clear</button>
-        Selected:
-        <ul id="influencersSelected"></ul>
+        <div class="button-container">
+          <button class="active">Hourly Prediction Chart</button>
+        </div>
+        <div class="button-container">
+          <button>Daily Prediction Chart</button>
+        </div>
       </div>
-    </div>
-    <h2>Today's Charts</h2>
-    <div id="prices-chart-div"></div>
-    <div id="tweetcount-chart-div" class="chart"></div>
-    <div id="tbpolarity-chart-div" class="chart"></div>
-    <div id="vader-chart-div" class="chart"></div>
-    <div>
-      <h2> Today's Top influencers</h2>
-      <table id="top-influencers-table">
-        <tr>
-          <th>TwitterHandle</th>
-          <th>followers</th>
-          <th>BTC related tweets</th>
-        </tr>
-        <% for(var i=0; i < influencers.length; i++){ %>
-          <tr>
-            <td>
-              <%= influencers[i].accountName %>
-            </td>
-            <td>
-              <%= influencers[i].followers.toLocaleString() %>
-            </td>
-            <td>
-              <%= influencers[i].tweets.length %>
-            </td>
-          </tr>
-          <% } %>
-      </table>
-      <h2>Top Tweets</h2>
-      <table id="top-influencers-table">
-        <tr>
-          <th>TwitterHandle</th>
-          <th>Sentiment</th>
-          <th>S-Score</th>
-          <th>Tweet</th>
-        </tr>
-        <% for(var i=0; i < topTweets.length; i++){ %>
-          <tr>
-            <td>
-              <%= topTweets[i].accountName %>
-            </td>
-            <td>
-              <%= topTweets[i].sentiment %>
-            </td>
-            <td>
-              <%= topTweets[i].sentimentScore %>
-            </td>
-            <td>
-              <%= topTweets[i].text %>
-            </td>
-            <td>
-              <%= topTweets[i].retweets %>
-            </td>
-          </tr>
-          <% } %>
-      </table>
+      <div id="graphs-container">
+        <div id="hourly-graphs">
+          <!-- HOURLY -->
+          <div class="chart" id="hourly-graph-price-only"></div>
+          <div class="chart" id="hourly-graph-with-sentiment"></div>
+          <!-- END HOURLY -->
+        </div>
+        <div id="daily-graphs" style="display:none;">
+          <!--DAILY -->
+          <div class="chart" id="daily-graph-price-only"></div>
+          <div class="chart" id="daily-graph-with-sentiment"></div>
+          <!-- END DAILY -->
+        </div>
+      </div>
     </div>
   </div>
+  <footer>
+    <span>Trent University: COIS-4000Y Software Engineering Project</span>
+    <br>
+    <span>
+        Created by: <a title="Nakul Roghelia" href="https://www.github.om/nhavoc">@nhavoc</a>, <a title="Michael Dragan" href="https://www.github.com/MichaelDragan">@MichaelDragan</a>, <a title="Matthew Rowlandson" href="http://www.github.com/Treeless">@Treeless</a> &amp; <a href="https://www.github.com/sidelaunch" title="Eliot Boyd">@Sidelaunch</a>
+      </span>
+  </footer>
 </body>
 
 </html>
