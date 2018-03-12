@@ -52,6 +52,9 @@
       name: 'CryptoSense prediction',
       tooltip: {
         valueDecimals: 2
+      },
+      line: {
+        dashStyle: "Dot"
       }
     };
     var generalChartSettings = {
@@ -61,7 +64,9 @@
       exporting: { enabled: false },
       plotOptions: {
         series: {
-          connectEnds: true
+          marker:{
+            symbol: "circle"
+          }
         }
       }
     };
@@ -74,7 +79,6 @@
         text: 'Price of Bitcoin: Hourly [Prediction made using price history]'
       },
       series: [{
-          id: "actual",
           name: 'Price (per hour)',
           data: hourlyPriceData,
           tooltip: {
@@ -88,91 +92,59 @@
     }, generalChartSettings));
 
     // Chart hourly (price and sentiment prediction)
-    chart = Highcharts.chart(hourlyWithPriceAndSentiment, {
-      xAxis: {
-        type: 'datetime'
-      },
-      plotOptions: {
-        line: {
-          marker: {
-            enabled: false
-          }
-        }
-      },
+    var hourlyPredictionPriceAndSentiment = <%- JSON.stringify(chartData.hourlyPredictionPriceAndSentiment) %>;
+    chart = Highcharts.chart(hourlyWithPriceAndSentiment, Object.assign({
       title: {
         text: 'Price of Bitcoin: Hourly [Prediction made using Price History & Community Sentiment]'
       },
-      exporting: { enabled: false },
       series: [{
         name: 'Price (per hour)',
         data: <%- JSON.stringify(chartData.hourlyPriceData) %>,
         tooltip: {
           valueDecimals: 2
         }
-      }]
-    });
+      }, Object.assign({
+        data: hourlyPredictionPriceAndSentiment
+      }, generalPredictionSeriesSettings)]
+    }, generalChartSettings));
 
     // Chart the daily (prediction using price only)
-    chart = Highcharts.chart(dailyWithPriceOnly, {
-      xAxis: {
-        type: 'datetime'
-      },
+    chart = Highcharts.chart(dailyWithPriceOnly, Object.assign({
       title: {
         text: 'Price of Bitcoin: Daily [Prediction made using Price History]'
       },
-      exporting: { enabled: false },
       series: [{
           name: 'USD Price (by day closing price)',
           data: <%- JSON.stringify(chartData.dailyPriceData) %>,
           tooltip: {
             valueDecimals: 2
-          },
-          plotOptions: {
-            line: {
-              marker: {
-                enabled: false
-              },
-            }
           }
         },
-        {
+        Object.assign({
           name: 'CryptoSense prediction',
           data: <%- JSON.stringify(chartData.dailyPredictionPriceAndSentiment) %>,
           tooltip: {
             valueDecimals: 2
-          },
-          plotOptions: {
-            line: {
-              dashStyle: "dot"
-            }
-          },
-        }
+          }
+        }, generalPredictionSeriesSettings)
       ]
-    });
+    }, generalChartSettings));
 
     //Chart the daily (prediction made using price AND sentment)
-    chart = Highcharts.chart(dailyWithPriceAndSentiment, {
-      xAxis: {
-        type: 'datetime'
-      },
+    chart = Highcharts.chart(dailyWithPriceAndSentiment, Object.assign({
       title: {
         text: 'Price of Bitcoin: Daily [Prediction made using Price History & Community Sentiment]'
       },
-      exporting: { enabled: false },
       series: [{
         name: 'USD Price (by day closing price)',
         data: <%- JSON.stringify(chartData.dailyPriceData) %>,
         tooltip: {
           valueDecimals: 2
         }
-      }, {
-        name: 'CryptoSense prediction',
+      }, Object.assign({
         data: <%- JSON.stringify(chartData.dailyPredictionPriceOnly) %>,
-        tooltip: {
-          valueDecimals: 2
-        }
-      }]
-    });
+      }, generalPredictionSeriesSettings)]
+    }, generalChartSettings));
   });
   </script>
   <link href="/css/main.css" rel="stylesheet" type="text/css" />

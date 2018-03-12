@@ -78,10 +78,28 @@
     return formatted
   }
 
+  var currentBitcoinPrice = function() {
+    return new Promise(function(resolve, reject) {
+      var spawn = require("child_process").spawn;
+      var pythonProcess = spawn('python', [Config.smsa_repo + "/interfaces/prices.py", "now"]);
+
+      pythonProcess.stdout.on('data', function(data) {
+
+        // On output (our data)
+        data = JSON.parse(data.toString('utf-8'));
+        resolve(data)
+      });
+
+      pythonProcess.stderr.on('data', function(data) {
+        console.log(data.toString('utf-8'));
+      });
+    });
+  };
+
   //Returns the prediction data in the chartable format
   var formatPredictionDataForChart = function(data) {
     var formatted = [];
-    for(var i=0; i< data.length; i++){
+    for (var i = 0; i < data.length; i++) {
       formatted.push([moment(data[i].date).valueOf(), parseFloat(data[i].price)]);
     }
     return formatted;
@@ -93,39 +111,42 @@
     //The last predictions for each hourly, daily
     // TODO, pull this data from mongodb if its being put in there
 
-    //hourly [2 prediction types] - prediction with sentiment, and prediction without
+    //hourly, daily [2 prediction types] - Each with prediction with sentiment, and prediction without
+    //@NOTE You need to ensure the data is sorted when gathered from MongoDB
     var predictions = {
       "hourly": {
         "priceOnly": [{
-          price: 11000, //Price prediction
-          percentage: 13, //Percentage change based on previous hour
-          date: moment().add(3, "hour").valueOf() //timestamp of when the prediction is for
-        },
-        {
-          price: 12000,
-          percentage: 17,
-          date: moment().add(2, "hour").valueOf()
-        },
-        {
-          price: 10200,
-          percentage: 17,
-          date: moment().add(1, "hour").valueOf()
-        }],
+            price: 11000, //Price prediction
+            percentage: 13, //Percentage change based on previous hour
+            date: moment().add(3, "hour").valueOf() //timestamp of when the prediction is for
+          },
+          {
+            price: 12000,
+            percentage: 17,
+            date: moment().add(2, "hour").valueOf()
+          },
+          {
+            price: 10200,
+            percentage: 17,
+            date: moment().add(1, "hour").valueOf()
+          }
+        ],
         "priceAndSentiment": [{
-          price: 12000,
-          percentage: 17,
-          date: moment().add(3, "hour").valueOf()
-        },
-        {
-          price: 11522,
-          percentage: 17,
-          date: moment().add(2, "hour").valueOf()
-        },
-        {
-          price: 10501,
-          percentage: 17,
-          date: moment().add(1, "hour").valueOf()
-        }]
+            price: 12000,
+            percentage: 17,
+            date: moment().add(3, "hour").valueOf()
+          },
+          {
+            price: 11522,
+            percentage: 17,
+            date: moment().add(2, "hour").valueOf()
+          },
+          {
+            price: 10501,
+            percentage: 17,
+            date: moment().add(1, "hour").valueOf()
+          }
+        ]
       },
       "daily": {
         "priceOnly": [{
@@ -176,7 +197,6 @@
         "date": { $gte: fortyEightHoursAgo }
       }]
     }).toArray(function(err, hourlyPriceData) {
-
       hourlyPriceData = formatDataForChart("hourly", hourlyPriceData);
 
       //Pull from predictions data and format for use in charts
@@ -194,19 +214,20 @@
         var dailyPricePredictionViaPrices = formatPredictionDataForChart(predictions.daily.priceOnly);
         var dailyPricePredictionViaSentimentAndPrice = formatPredictionDataForChart(predictions.daily.priceAndSentiment);
 
-        //Note: HourlyPriceData is the bitcoin prices per hour for 48 hour period. The predictions are charted independently on the same graph
+        var nextDayPrediction = predictions.daily.priceOnly[predictions.daily.priceOnly.length - 1];
+        var nextHourPrediction = predictions.hourly.priceOnly[predictions.hourly.priceOnly.length - 1]
         res.render("index.ejs", {
           chartData: {
             hourlyPriceData: hourlyPriceData,
             hourlyPredictionPriceOnly: hourlyPricePredictionViaPrices,
-            hourlyPredictionPriceAndSentiment: dailyPricePredictionViaSentimentAndPrice,
+            hourlyPredictionPriceAndSentiment: hourlyPricePredictionViaSentimentAndPrice,
             dailyPriceData: dailyPriceChartData,
             dailyPredictionPriceOnly: dailyPricePredictionViaPrices,
             dailyPredictionPriceAndSentiment: dailyPricePredictionViaSentimentAndPrice
           },
           predictions: predictions,
-          nextDayPrediction: predictions.daily.priceOnly[predictions.daily.priceOnly.length - 1], //Last prediction we made for daily
-          nextHourPrediction: predictions.hourly.priceOnly[predictions.hourly.priceOnly.length - 1], //Last prediction we made for hourly
+          nextDayPrediction: nextDayPrediction, //Last prediction we made for daily
+          nextHourPrediction: nextHourPrediction, //Last prediction we made for hourly
           moment: moment
         });
       });
@@ -214,19 +235,9 @@
   });
 
   app.get("/current-bitcoin-price", function(req, res) {
-    var spawn = require("child_process").spawn;
-    var pythonProcess = spawn('python', [Config.smsa_repo + "/interfaces/prices.py", "now"]);
-
-    pythonProcess.stdout.on('data', function(data) {
-
-      // On output (our data)
-      data = JSON.parse(data.toString('utf-8'));
+    currentBitcoinPrice().then(function(data) {
       res.json(data);
-    });
-
-    pythonProcess.stderr.on('data', function(data) {
-      console.log(data.toString('utf-8'));
-    });
+    })
   });
 
   app.listen('80', function() {
