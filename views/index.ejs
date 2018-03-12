@@ -10,34 +10,34 @@
   <script src="js/highchart-theme.js"></script>
   <script src="js/realtime.js"></script>
   <script type="text/javascript">
-    var state = "hourly"; //Hourly is the default state
-    // Button logic to hide and show certain charts
-    var buttonLogic = function(e){
-      console.log("BUTTON CLICKED")
-      var id = $(e.currentTarget).attr('id');
-      if(id.indexOf('hourly') > -1){
-        if(state != "hourly"){
-          //Show the hourly graphs
-          console.log("show hourly graphs")
-          $('#hourly-graphs').show();
-          $('#daily-graphs').hide();
-          state = "hourly";
-        }
-      }else if(id.indexOf('daily') > -1){
-        if(state != "daily"){
-          //show the daily graphs
-          console.log("show daily graphs");
-          $('#daily-graphs').show();
-          $('#hourly-graphs').hide();
-          state = "daily";
-        }
+  var state = "hourly"; //Hourly is the default state
+  // Button logic to hide and show certain charts
+  var buttonLogic = function(e) {
+    console.log("BUTTON CLICKED")
+    var id = $(e.currentTarget).attr('id');
+    if (id.indexOf('hourly') > -1) {
+      if (state != "hourly") {
+        //Show the hourly graphs
+        console.log("show hourly graphs")
+        $('#hourly-graphs').show();
+        $('#daily-graphs').hide();
+        state = "hourly";
+      }
+    } else if (id.indexOf('daily') > -1) {
+      if (state != "daily") {
+        //show the daily graphs
+        console.log("show daily graphs");
+        $('#daily-graphs').show();
+        $('#hourly-graphs').hide();
+        state = "daily";
       }
     }
+  }
 
-    $(function(){
-      $('#hourly-button').on('click', buttonLogic);
-      $('#daily-button').on('click', buttonLogic)
-    });
+  $(function() {
+    $('#hourly-button').on('click', buttonLogic);
+    $('#daily-button').on('click', buttonLogic)
+  });
   </script>
   <script type="text/javascript">
   // Page logic (note, themes etc, moved to highchart-theme.js)
@@ -48,33 +48,44 @@
     var dailyWithPriceOnly = "daily-graph-price-only";
     var dailyWithPriceAndSentiment = "daily-graph-with-sentiment";
 
-    var generalPredictionSeriesSettings = {};
-    var generalChartSettings = {};
-
-    // Chart the hourly (price only)
-    var chart = Highcharts.chart(hourlyWithPriceOnly, {
+    var generalPredictionSeriesSettings = {
+      name: 'CryptoSense prediction',
+      tooltip: {
+        valueDecimals: 2
+      }
+    };
+    var generalChartSettings = {
       xAxis: {
         type: 'datetime'
       },
+      exporting: { enabled: false },
       plotOptions: {
-        line: {
-          marker: {
-            enabled: false
-          }
+        series: {
+          connectEnds: true
         }
-      },
+      }
+    };
+
+    // Chart the hourly (price only)
+    var hourlyPriceData = <%- JSON.stringify(chartData.hourlyPriceData) %>;
+    var hourlyPredictionViaPrice = <%- JSON.stringify(chartData.hourlyPredictionPriceOnly) %>;
+    var chart = Highcharts.chart(hourlyWithPriceOnly, Object.assign({
       title: {
         text: 'Price of Bitcoin: Hourly [Prediction made using price history]'
       },
-      exporting: { enabled: false },
       series: [{
-        name: 'Price (per hour)',
-        data: <%- JSON.stringify(chartData.hourlyPriceData) %>,
-        tooltip: {
-          valueDecimals: 2
-        }
-      }]
-    });
+          id: "actual",
+          name: 'Price (per hour)',
+          data: hourlyPriceData,
+          tooltip: {
+            valueDecimals: 2
+          }
+        },
+        Object.assign({
+          data: hourlyPredictionViaPrice,
+        }, generalPredictionSeriesSettings)
+      ]
+    }, generalChartSettings));
 
     // Chart hourly (price and sentiment prediction)
     chart = Highcharts.chart(hourlyWithPriceAndSentiment, {
@@ -189,7 +200,7 @@
       <hr>
     </div>
     <div class="center">
-      Realtime BTC:
+      Realtime Market Bitcoin Price:
       <span id="bitcoin-price">'Loading'</span> USD
       <div>
         <div>
@@ -216,7 +227,7 @@
             </div>
           </div>
         </div>
-        <div id="prediction-container" class=<%=( (nextHourPrediction.percentage > 0) ? "green-color" : "red-color") %>>
+        <div id="prediction-container" class=<%=( (nextHourPrediction.percentage> 0) ? "green-color" : "red-color") %>>
           <span id="prediction-number">$<%= nextHourPrediction.price.toLocaleString() %></span> | <span id="prediction-percentage-change"><span class='<%= ((nextHourPrediction.percentage > 0) ? "fa fa-arrow-up" : "fa fa-arrow-down") %>'></span>
           <%= nextHourPrediction.percentage %>%</span>
         </div>
