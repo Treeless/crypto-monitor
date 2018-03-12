@@ -79,8 +79,12 @@
   }
 
   //Returns the prediction data in the chartable format
-  var formatPredictionDataForChart = function() {
-
+  var formatPredictionDataForChart = function(data) {
+    var formatted = [];
+    for(var i=0; i< data.length; i++){
+      formatted.push([moment(data[i].date).valueOf(), parseFloat(data[i].price)]);
+    }
+    return formatted;
   }
 
   //Main homepage view route
@@ -89,15 +93,36 @@
     //The last predictions for each hourly, daily
     // TODO, pull this data from mongodb if its being put in there
 
+    //hourly [2 prediction types] - prediction with sentiment, and prediction without
     var predictions = {
       "hourly": {
         "priceOnly": [{
-          price: 11000,
-          percentage: 13,
+          price: 11000, //Price prediction
+          percentage: 13, //Percentage change based on previous hour
+          date: moment().add(3, "hour").valueOf() //timestamp of when the prediction is for
+        },
+        {
+          price: 12000,
+          percentage: 17,
+          date: moment().add(2, "hour").valueOf()
+        },
+        {
+          price: 10200,
+          percentage: 17,
           date: moment().add(1, "hour").valueOf()
         }],
         "priceAndSentiment": [{
           price: 12000,
+          percentage: 17,
+          date: moment().add(3, "hour").valueOf()
+        },
+        {
+          price: 11522,
+          percentage: 17,
+          date: moment().add(2, "hour").valueOf()
+        },
+        {
+          price: 10501,
           percentage: 17,
           date: moment().add(1, "hour").valueOf()
         }]
@@ -106,13 +131,32 @@
         "priceOnly": [{
           price: 11500,
           percentage: 17,
+          date: moment().add(3, "day").valueOf()
+        }, {
+          price: 9004,
+          percentage: 17,
+          date: moment().add(2, "day").valueOf()
+        }, {
+          price: 12100,
+          percentage: 17,
           date: moment().add(1, "day").valueOf()
         }],
         priceAndSentiment: [{
-          price: 12500,
-          percentage: 17,
-          date: moment().add(1, "day").valueOf()
-        }]
+            price: 12500,
+            percentage: 17,
+            date: moment().add(3, "day").valueOf()
+          },
+          {
+            price: 11224,
+            percentage: 19,
+            date: moment().add(2, "day").valueOf()
+          },
+          {
+            price: 10124,
+            percentage: 10,
+            date: moment().add(1, "day").valueOf()
+          }
+        ]
       }
     };
 
@@ -135,31 +179,20 @@
 
       hourlyPriceData = formatDataForChart("hourly", hourlyPriceData);
 
-      //TODO: once we have actually prediction data, use the format function for setting these
-      var hourlyPricePredictionViaPrices = [
-        [predictions.hourly.priceOnly[0].date, predictions.hourly.priceOnly[0].price]
-      ]; //This data will be tacked onto the hourlyPriceChartData for 'hourly price only chart'
-      var hourlyPricePredictionViaSentimentAndPrice = [
-        [predictions.hourly.priceAndSentiment[0].date, predictions.hourly.priceAndSentiment[0].price]
-      ]; // This data will be takcked onto the hourlyPriceChartData for 'hourly price AND sentiment chart'
+      //Pull from predictions data and format for use in charts
+      var hourlyPricePredictionViaPrices = formatPredictionDataForChart(predictions.hourly.priceOnly);
+      var hourlyPricePredictionViaSentimentAndPrice = formatPredictionDataForChart(predictions.hourly.priceAndSentiment); // This data will be takcked onto the hourlyPriceChartData for 'hourly price AND sentiment chart'
 
       //Display last 30 days for Daily
       var thirtyDaysAgo = moment().subtract(30, "day").unix(); //FOR PYTHON
       getHistoricalPrice(thirtyDaysAgo, moment(today).unix()).then(function(priceData) {
-        // Format the data we get into daily close data segments
-        console.log("Daily:", );
-
+        // Format the data we get into daily close data segments : [[timestamp, price], ...]
         var dailyPriceChartData = formatDataForChart("daily", priceData);
 
 
-        //TODO: once we have actually prediction data, use the format function for setting these
-        var dailyPricePredictionViaPrices = [
-          [predictions.daily.priceOnly[0].date, predictions.daily.priceOnly[0].price]
-        ];
-        var dailyPricePredictionViaSentimentAndPrice = [
-          [predictions.daily.priceAndSentiment[0].date, predictions.daily.priceAndSentiment[0].price]
-        ];
-
+        //Pull from predictions data and format for use in charts
+        var dailyPricePredictionViaPrices = formatPredictionDataForChart(predictions.daily.priceOnly);
+        var dailyPricePredictionViaSentimentAndPrice = formatPredictionDataForChart(predictions.daily.priceAndSentiment);
 
         //Note: HourlyPriceData is the bitcoin prices per hour for 48 hour period. The predictions are charted independently on the same graph
         res.render("index.ejs", {
@@ -172,8 +205,8 @@
             dailyPredictionPriceAndSentiment: dailyPricePredictionViaSentimentAndPrice
           },
           predictions: predictions,
-          nextDayPrediction: predictions.daily.priceOnly[predictions.daily.priceOnly.length-1], //Last prediction we made for daily
-          nextHourPrediction: predictions.hourly.priceOnly[predictions.hourly.priceOnly.length-1], //Last prediction we made for hourly
+          nextDayPrediction: predictions.daily.priceOnly[predictions.daily.priceOnly.length - 1], //Last prediction we made for daily
+          nextHourPrediction: predictions.hourly.priceOnly[predictions.hourly.priceOnly.length - 1], //Last prediction we made for hourly
           moment: moment
         });
       });
