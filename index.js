@@ -22,89 +22,162 @@
   app.set('view engine', 'ejs'); //Set the view engine
   app.set('views', __dirname + '/views'); //set views folder
 
+
+  //Historical price (start and end need to be a unix timestamp)
+  var getHistoricalPrice = function(start, end) {
+    return new Promise(function(resolve, reject) {
+      var spawn = require("child_process").spawn;
+      var pythonProcess = spawn('python', [Config.smsa_repo + "/interfaces/prices.py", "historical", start, end]);
+
+      pythonProcess.stdout.on('data', function(data) {
+
+        // On output (our data)
+        data = JSON.parse(data.toString('utf-8'));
+        resolve(data)
+      });
+
+      pythonProcess.stderr.on('data', function(data) {
+        console.log(data.toString('utf-8'));
+      });
+    });
+  }
+
+  //period = "hourly" OR "daily"
+  //data is information straight from SMSA and coinmarketcap
+  var formatDataForChart = function(period, data) {
+    /*
+    DAILY:
+    Format of data before formatting
+      {'2018-03-02':
+       { crypto: 'BTC',
+         timestamp: 1519966800,
+         close: 11086.4,
+         high: 11189,
+         low: 10850.1,
+         open: 10977.4,
+         usd_market_cap: 185456000000,
+         usd_volume: 7620590000 }
+         ,}
+    */
+    var formatted = [];
+    if (period == "hourly") {
+      for (var i = 0; i < data.length; i++) {
+        formatted.push([moment(data[i].date).valueOf(), parseFloat(data[i].price)]);
+      }
+    } else if (period == "daily") {
+      var dateKeys = Object.keys(data);
+      for (var i = 0; i < dateKeys.length; i++) {
+        var date = dateKeys[i];
+        var timestamp = moment(data[date].timestamp * 1000).valueOf();
+        var price = data[date].close;
+        formatted.push([timestamp, price]);
+      }
+    } else {
+      console.log("Period needs to be hourly or daily");
+    }
+    return formatted
+  }
+
+  //Returns the prediction data in the chartable format
+  var formatPredictionDataForChart = function() {
+
+  }
+
   //Main homepage view route
   app.get('/', function(req, res) {
+
+    //The last predictions for each hourly, daily
+    // TODO, pull this data from mongodb if its being put in there
+
     var predictions = {
       "nextHour": {
-        price: 11000,
-        percentage: 13,
-        date: moment().add('hour', 1)
+        "priceOnly": [{
+          price: 11000,
+          percentage: 13,
+          date: moment().add(1, "hour").valueOf()
+        }],
+        "priceAndSentiment": [{
+          price: 12000,
+          percentage: 17,
+          date: moment().add(1, "hour").valueOf()
+        }]
       },
       "nextDay": {
-        price: 11500,
-        percentage: 17,
-        date: moment().add('day', 1)
+        "priceOnly": [{
+          price: 11500,
+          percentage: 17,
+          date: moment().add(1, "day").valueOf()
+        }],
+        priceAndSentiment: [{
+          price: 12500,
+          percentage: 17,
+          date: moment().add(1, "day").valueOf()
+        }]
       }
     };
 
+    //PLEASE NOTE:
+    //Temporarily predictions are gonna be some random data (THIS NEEDS TO LATER COME FROM MONGODB)
 
-    //Make the date we show to be the last week.
-    var dates = { start: moment().startOf('week').toDate(), end: moment().endOf('day').toDate() }
+    //The hourly data
+    var hourlyPriceChartData = [];
 
-    var chartedInfluencerData = [];
+    //Display last 48 hours for hourly
+    var today = moment().toDate()
+    var fortyEightHoursAgo = moment().subtract(48, "hour").toDate()
+    Mongoose.connection.db.collection('live_tweets_sent').find({
+      $and: [{
+        "date": { "$lte": today }
+      }, {
+        "date": { $gte: fortyEightHoursAgo }
+      }]
+    }).toArray(function(err, hourlyPriceData) {
 
-    //Find all the influencers that have tweets between our two dates
-    Mongoose.connection.db.collection('influencers').find({
-      "tweets": {
-        $elemMatch: { "$and": [{ "dateRaw": { "$gte": new Date(dates.start) } }, { "dateRaw": { "$lte": new Date(dates.end) } }] }
-      }
-    }).sort({ followers: -1 }).limit(10).toArray(function(err, influencers) {
-      if (err) {
-        console.log(err);
-        return res.send("MONGODB ERROR. AAAAAAAAHHHH..." + err)
-      }
+      hourlyPriceData = formatDataForChart("hourly", hourlyPriceData);
 
-      //Get the top tweets from each influencer we have this week
-      // Also, format some data so we can plot on the bitcoin price chart
-      var topTweets = [];
-      for (var i = 0; i < influencers.length; i++) {
-        var influencer = influencers[i];
-        for (var j = 0; j < influencer.tweets.length; j++) {
-          var tweet = influencer.tweets[j]
-          //[timestamp, tweet]
-          chartedInfluencerData.push([moment(tweet.dateRaw).valueOf(), tweet.text])
-        }
+      //TODO: once we have actually prediction data, use the format function for setting these
+      var hourlyPricePredictionViaPrices = [
+        [predictions.nextHour.priceOnly[0].date, predictions.nextHour.priceOnly[0].price]
+      ]; //This data will be tacked onto the hourlyPriceChartData for 'hourly price only chart'
+      var hourlyPricePredictionViaSentimentAndPrice = [
+        [predictions.nextHour.priceAndSentiment[0].date, predictions.nextHour.priceAndSentiment[0].price]
+      ]; // This data will be takcked onto the hourlyPriceChartData for 'hourly price AND sentiment chart'
 
-        topTweets.push(Object.assign({ accountName: influencer.accountName }, influencer.tweets[0]));
-      }
+      //Display last 30 days for Daily
+      var thirtyDaysAgo = moment().subtract(30, "day").unix(); //FOR PYTHON
+      getHistoricalPrice(thirtyDaysAgo, moment(today).unix()).then(function(priceData) {
+        // Format the data we get into daily close data segments
+        console.log("Daily:", );
 
-      //GET THE sentiment and price data outputted by the SMSA repo
-      // Ex: { "_id" : ObjectId("5aa19fbe46b3c33ce4e5c4f2"), "symbol" : "BTC", 
-      //  "date" : ISODate("2018-03-08T20:40:30.631Z"), "tweet_count" : "792", 
-      //  "timestamp" : "1520557200.0", "tb_polarity" : "0.1523370823433956",
-      //  "vader_polarity" : "0.21940012626262625", "price" : "9404.7" }
-      Mongoose.connection.db.collection("live_tweets_sent")
-        .find({ "$and": [{ "date": { "$gte": new Date(dates.start) } }, { "date": { "$lte": new Date(dates.end) } }] })
-        .toArray(function(err, output) {
-          if (err) {
-            console.log("error getting live_tweets_sent", err)
-          } else {
-
-            //Get the values
-            let formattedData = {}
-
-            formattedData.tweet_count = output.map(a => [moment(a.date).valueOf(), parseInt(a.tweet_count)]);
-            formattedData.tbpol = output.map(a => [moment(a.date).valueOf(), parseFloat(a.tb_polarity)]);
-            formattedData.vader = output.map(a => [moment(a.date).valueOf(), parseFloat(a.vader_polarity)]);
-            formattedData.prices = output.map(a => [moment(a.date).valueOf(), parseFloat(a.price)]);
-
-            console.log(formattedData)
+        var dailyPriceChartData = formatDataForChart("daily", priceData);
 
 
-            //GET THE PREDICTION FROM SMSA
-            // Should be stored in mongo
-            // TODO. Waiting on nakul's stuff
-            var predictedPrice = { date: moment().format("YYYY-MM-DD"), price: 11000 };
+        //TODO: once we have actually prediction data, use the format function for setting these
+        var dailyPricePredictionViaPrices = [
+          [predictions.nextDay.priceOnly[0].date, predictions.nextDay.priceOnly[0].price]
+        ];
+        var dailyPricePredictionViaSentimentAndPrice = [
+          [predictions.nextDay.priceAndSentiment[0].date, predictions.nextDay.priceAndSentiment[0].price]
+        ];
 
 
-            res.render("index.ejs", {
-              chartData: { hourlyPriceOnly: [], hourlyPriceAndSentiment: [], dailyPriceOnly: [], dailyPriceAndSentiment: [] },
-              dates: dates,
-              predictions: predictions
-            });
-          }
-        })
-    })
+        //Note: HourlyPriceData is the bitcoin prices per hour for 48 hour period. The predictions are charted independently on the same graph
+        res.render("index.ejs", {
+          chartData: {
+            hourlyPriceData: hourlyPriceData,
+            hourlyPredictionPriceOnly: hourlyPricePredictionViaPrices,
+            hourlyPredictionPriceAndSentiment: dailyPricePredictionViaSentimentAndPrice,
+            dailyPriceData: dailyPriceChartData,
+            dailyPredictionPriceOnly: dailyPricePredictionViaPrices,
+            dailyPredictionPriceAndSentiment: dailyPricePredictionViaSentimentAndPrice
+          },
+          predictions: predictions,
+          nextDayPrediction: predictions.nextDay.priceOnly[predictions.nextDay.priceOnly.length-1], //Last prediction we made for daily
+          nextHourPrediction: predictions.nextHour.priceOnly[predictions.nextHour.priceOnly.length-1], //Last prediction we made for hourly
+          moment: moment
+        });
+      });
+    });
   });
 
   app.get("/current-bitcoin-price", function(req, res) {
@@ -121,7 +194,7 @@
     pythonProcess.stderr.on('data', function(data) {
       console.log(data.toString('utf-8'));
     });
-  })
+  });
 
   app.listen('80', function() {
     console.log(Chalk.yellow("App listening on port: 80"));
