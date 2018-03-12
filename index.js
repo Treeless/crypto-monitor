@@ -90,7 +90,7 @@
     // TODO, pull this data from mongodb if its being put in there
 
     var predictions = {
-      "nextHour": {
+      "hourly": {
         "priceOnly": [{
           price: 11000,
           percentage: 13,
@@ -102,7 +102,7 @@
           date: moment().add(1, "hour").valueOf()
         }]
       },
-      "nextDay": {
+      "daily": {
         "priceOnly": [{
           price: 11500,
           percentage: 17,
@@ -137,10 +137,10 @@
 
       //TODO: once we have actually prediction data, use the format function for setting these
       var hourlyPricePredictionViaPrices = [
-        [predictions.nextHour.priceOnly[0].date, predictions.nextHour.priceOnly[0].price]
+        [predictions.hourly.priceOnly[0].date, predictions.hourly.priceOnly[0].price]
       ]; //This data will be tacked onto the hourlyPriceChartData for 'hourly price only chart'
       var hourlyPricePredictionViaSentimentAndPrice = [
-        [predictions.nextHour.priceAndSentiment[0].date, predictions.nextHour.priceAndSentiment[0].price]
+        [predictions.hourly.priceAndSentiment[0].date, predictions.hourly.priceAndSentiment[0].price]
       ]; // This data will be takcked onto the hourlyPriceChartData for 'hourly price AND sentiment chart'
 
       //Display last 30 days for Daily
@@ -154,10 +154,10 @@
 
         //TODO: once we have actually prediction data, use the format function for setting these
         var dailyPricePredictionViaPrices = [
-          [predictions.nextDay.priceOnly[0].date, predictions.nextDay.priceOnly[0].price]
+          [predictions.daily.priceOnly[0].date, predictions.daily.priceOnly[0].price]
         ];
         var dailyPricePredictionViaSentimentAndPrice = [
-          [predictions.nextDay.priceAndSentiment[0].date, predictions.nextDay.priceAndSentiment[0].price]
+          [predictions.daily.priceAndSentiment[0].date, predictions.daily.priceAndSentiment[0].price]
         ];
 
 
@@ -172,8 +172,8 @@
             dailyPredictionPriceAndSentiment: dailyPricePredictionViaSentimentAndPrice
           },
           predictions: predictions,
-          nextDayPrediction: predictions.nextDay.priceOnly[predictions.nextDay.priceOnly.length-1], //Last prediction we made for daily
-          nextHourPrediction: predictions.nextHour.priceOnly[predictions.nextHour.priceOnly.length-1], //Last prediction we made for hourly
+          nextDayPrediction: predictions.daily.priceOnly[predictions.daily.priceOnly.length-1], //Last prediction we made for daily
+          nextHourPrediction: predictions.hourly.priceOnly[predictions.hourly.priceOnly.length-1], //Last prediction we made for hourly
           moment: moment
         });
       });

@@ -19,12 +19,16 @@
         if(state != "hourly"){
           //Show the hourly graphs
           console.log("show hourly graphs")
+          $('#hourly-graphs').show();
+          $('#daily-graphs').hide();
           state = "hourly";
         }
       }else if(id.indexOf('daily') > -1){
         if(state != "daily"){
           //show the daily graphs
           console.log("show daily graphs");
+          $('#daily-graphs').show();
+          $('#hourly-graphs').hide();
           state = "daily";
         }
       }
@@ -244,6 +248,7 @@
       </div>
       <div id="graphs-container">
         <div id="hourly-graphs">
+          <h3>Hourly Bitcoin Prices - $USD [Hourly Price]</h3>
           <!-- HOURLY -->
           <div class="chart" id="hourly-graph-price-only"></div>
           <div class="chart" id="hourly-graph-with-sentiment"></div>
@@ -251,6 +256,7 @@
         </div>
         <div id="daily-graphs" style="display:none;">
           <!--DAILY -->
+          <h3>Daily Bitcoin Prices - $USD [Closing Price]</h3>
           <div class="chart" id="daily-graph-price-only"></div>
           <div class="chart" id="daily-graph-with-sentiment"></div>
           <!-- END DAILY -->
@@ -262,7 +268,7 @@
     <span>Trent University: COIS-4000Y Software Engineering Project</span>
     <br>
     <span>
-        Created by: <a title="Nakul Roghelia" href="https://www.github.om/nhavoc">@nhavoc</a>, <a title="Michael Dragan" href="https://www.github.com/MichaelDragan">@MichaelDragan</a>, <a title="Matthew Rowlandson" href="http://www.github.com/Treeless">@Treeless</a> &amp; <a href="https://www.github.com/sidelaunch" title="Eliot Boyd">@Sidelaunch</a>
+        Created by: <a title="Nakul Roghelia" href="https://www.github.com/nhavoc">@nhavoc</a>, <a title="Michael Dragan" href="https://www.github.com/MichaelDragan">@MichaelDragan</a>, <a title="Matthew Rowlandson" href="https://www.github.com/Treeless">@Treeless</a> &amp; <a href="https://www.github.com/sidelaunch" title="Eliot Boyd">@Sidelaunch</a>
       </span>
   </footer>
 </body>
