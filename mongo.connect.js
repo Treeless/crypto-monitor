@@ -1,7 +1,7 @@
 (function() {
   //This class handles connecting to mongodb with mongoose
   var mongoose = require('mongoose');
-  var Chalk = require("Chalk");
+  var Chalk = require("chalk");
 
   const mongooseLabel = Chalk.yellow("Mongoose:");
   const errorLabel = Chalk.red("Error:");
