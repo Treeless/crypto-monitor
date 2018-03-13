@@ -23,7 +23,7 @@
     },
     "JWT_SECRET": "fa1790d321dd97541da9a5ae80432987a0cb3d4edcde28f4274ed607467caaa4",
     "port": 8083,
-    "smsa_repo": "~michaeldragan/SMSA/"
+    "smsa_repo": "/home/michaeldragan/SMSA"
   },
   "all":
   {}
