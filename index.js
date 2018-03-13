@@ -240,9 +240,8 @@
     })
   });
 
-  app.listen('80', function() {
-    console.log(Chalk.yellow("App listening on port: 80"));
+  app.listen(Config.port, function() {
+    console.log(Chalk.yellow("(" + Config.environment + ") App listening on port:" + Config.port));
   });
-
 
 }());
