@@ -27,7 +27,7 @@
   var getHistoricalPrice = function(start, end) {
     return new Promise(function(resolve, reject) {
       var spawn = require("child_process").spawn;
-      var pythonProcess = spawn('python', [Config.smsa_repo + "/interfaces/prices.py", "historical", start, end]);
+      var pythonProcess = spawn(Config.python_cmd, [Config.smsa_repo + "/interfaces/prices.py", "historical", start, end]);
 
       pythonProcess.stdout.on('data', function(data) {
 
@@ -81,7 +81,7 @@
   var currentBitcoinPrice = function() {
     return new Promise(function(resolve, reject) {
       var spawn = require("child_process").spawn;
-      var pythonProcess = spawn('python', [Config.smsa_repo + "/interfaces/prices.py", "now"]);
+      var pythonProcess = spawn(Config.python_cmd, [Config.smsa_repo + "/interfaces/prices.py", "now"]);
 
       pythonProcess.stdout.on('data', function(data) {
 

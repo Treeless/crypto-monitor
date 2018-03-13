@@ -10,7 +10,8 @@
     },
     "JWT_SECRET": "03c9b95e2d259ed09683b26ea147436adb01cf98d24aadb0bae0e5ffe39002fe",
     "smsa_repo": "c:/dev/smsa",
-    "port": 80
+    "port": 80,
+    "python_cmd": "python"
   },
   "production":
   {
@@ -23,7 +24,8 @@
     },
     "JWT_SECRET": "fa1790d321dd97541da9a5ae80432987a0cb3d4edcde28f4274ed607467caaa4",
     "port": 8083,
-    "smsa_repo": "/home/michaeldragan/SMSA"
+    "smsa_repo": "/home/michaeldragan/SMSA",
+    "python_cmd": "python3"
   },
   "all":
   {}
