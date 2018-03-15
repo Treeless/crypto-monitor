@@ -62,7 +62,7 @@
       exporting: { enabled: false },
       plotOptions: {
         series: {
-          marker:{
+          marker: {
             symbol: "circle"
           }
         }
@@ -110,6 +110,44 @@
         }, generalPredictionSeriesSettings)
       ]
     }, generalChartSettings));
+
+    //Chart the sentiment
+    //SENTIMENT CHARTS
+    //Hourly sentiment
+    chart = Highcharts.chart('sentiment-hourly-chart-div', {
+      xAxis: {
+        type: 'datetime'
+      },
+      yAxis: { allowDecimals: Boolean },
+      plotOptions: {
+        line: {
+          marker: {
+            enabled: false
+          }
+        }
+      },
+      title: {
+        text: 'Community Sentiment by Hour'
+      },
+      exporting: { enabled: false },
+      series: [{
+          name: "TextBlob Sentiment",
+          data: <%- JSON.stringify(chartData.hourlyTextblobPolarity) %>,
+          tooltip: {
+            valueDecimals: 4
+          },
+          color: "red"
+        },
+        {
+          name: "Vader Sentiment",
+          data: <%- JSON.stringify(chartData.hourlyVaderPolarity) %>,
+          tooltip: {
+            valueDecimals: 4
+          },
+          color: "yellow"
+        }
+      ]
+    });
   });
   </script>
   <link href="/css/main.css" rel="stylesheet" type="text/css" />
@@ -191,6 +229,8 @@
           <h3>Hourly Bitcoin Prices - $USD [Hourly Price]</h3>
           <!-- HOURLY -->
           <div class="chart" id="hourly-graph-price-only"></div>
+          <div id="sentiment-hourly-chart-div" class="chart"></div>
+          <span>** We use two sentiment libraries to ensure we can see a correlation in case one is incorrect during a hourly window</span>
           <!-- END HOURLY -->
         </div>
         <div id="daily-graphs" style="display:none;">

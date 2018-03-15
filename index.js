@@ -72,7 +72,11 @@
         var price = data[date].close;
         formatted.push([timestamp, price]);
       }
-    } else {
+    } else if (period == "tb" || period == "vd") {
+      for (var i = 0; i < data.length; i++) {
+        formatted.push([moment(data[i].date).valueOf(), parseFloat( (period == "tb") ? data[i].tb_polarity : data[i].vader_polarity)]);
+      }
+    }  else {
       console.log("Period needs to be hourly or daily");
     }
     return formatted
@@ -165,6 +169,8 @@
         "date": { $gte: fortyEightHoursAgo }
       }]
     }).toArray(function(err, hourlyPriceData) {
+      var hourlyTextblobPolarity = formatDataForChart("tb", hourlyPriceData);
+      var hourlyVaderPolarity = formatDataForChart("vd", hourlyPriceData);
       hourlyPriceData = formatDataForChart("hourly", hourlyPriceData);
 
       //Pull from predictions data and format for use in charts
@@ -176,7 +182,6 @@
         // Format the data we get into daily close data segments : [[timestamp, price], ...]
         var dailyPriceChartData = formatDataForChart("daily", priceData);
 
-
         //Pull from predictions data and format for use in charts
         var dailyPricePredictionViaPrices = formatPredictionDataForChart(predictions.daily.priceOnly);
 
@@ -187,7 +192,9 @@
             hourlyPriceData: hourlyPriceData,
             hourlyPredictionPriceOnly: hourlyPricePredictionViaPrices,
             dailyPriceData: dailyPriceChartData,
-            dailyPredictionPriceOnly: dailyPricePredictionViaPrices
+            dailyPredictionPriceOnly: dailyPricePredictionViaPrices,
+            hourlyTextblobPolarity: hourlyTextblobPolarity,
+            hourlyVaderPolarity: hourlyVaderPolarity
           },
           predictions: predictions,
           nextDayPrediction: nextDayPrediction, //Last prediction we made for daily
