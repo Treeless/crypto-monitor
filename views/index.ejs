@@ -43,10 +43,8 @@
   // Page logic (note, themes etc, moved to highchart-theme.js)
   $(function() {
     var hourlyWithPriceOnly = "hourly-graph-price-only";
-    var hourlyWithPriceAndSentiment = "hourly-graph-with-sentiment";
 
     var dailyWithPriceOnly = "daily-graph-price-only";
-    var dailyWithPriceAndSentiment = "daily-graph-with-sentiment";
 
     var generalPredictionSeriesSettings = {
       name: 'CryptoSense prediction',
@@ -91,23 +89,6 @@
       ]
     }, generalChartSettings));
 
-    // Chart hourly (price and sentiment prediction)
-    var hourlyPredictionPriceAndSentiment = <%- JSON.stringify(chartData.hourlyPredictionPriceAndSentiment) %>;
-    chart = Highcharts.chart(hourlyWithPriceAndSentiment, Object.assign({
-      title: {
-        text: 'Price of Bitcoin: Hourly [Prediction made using Price History & Community Sentiment]'
-      },
-      series: [{
-        name: 'Price (per hour)',
-        data: <%- JSON.stringify(chartData.hourlyPriceData) %>,
-        tooltip: {
-          valueDecimals: 2
-        }
-      }, Object.assign({
-        data: hourlyPredictionPriceAndSentiment
-      }, generalPredictionSeriesSettings)]
-    }, generalChartSettings));
-
     // Chart the daily (prediction using price only)
     chart = Highcharts.chart(dailyWithPriceOnly, Object.assign({
       title: {
@@ -122,28 +103,12 @@
         },
         Object.assign({
           name: 'CryptoSense prediction',
-          data: <%- JSON.stringify(chartData.dailyPredictionPriceAndSentiment) %>,
+          data: <%- JSON.stringify(chartData.dailyPredictionPriceOnly) %>,
           tooltip: {
             valueDecimals: 2
           }
         }, generalPredictionSeriesSettings)
       ]
-    }, generalChartSettings));
-
-    //Chart the daily (prediction made using price AND sentment)
-    chart = Highcharts.chart(dailyWithPriceAndSentiment, Object.assign({
-      title: {
-        text: 'Price of Bitcoin: Daily [Prediction made using Price History & Community Sentiment]'
-      },
-      series: [{
-        name: 'USD Price (by day closing price)',
-        data: <%- JSON.stringify(chartData.dailyPriceData) %>,
-        tooltip: {
-          valueDecimals: 2
-        }
-      }, Object.assign({
-        data: <%- JSON.stringify(chartData.dailyPredictionPriceOnly) %>,
-      }, generalPredictionSeriesSettings)]
     }, generalChartSettings));
   });
   </script>
@@ -160,15 +125,7 @@
       <ul>
         <li><a href="http://www.github.com/MichaelDragan/Smsa">Github: Prediction Model</a></li>
         <li><a href="http://www.github.com/Treeless/crypto-monitor">Github: Website</a></li>
-        <li><a href="http://www.github.com/Treeless/Bitsense">Github: Twitter Bot</a></li>
       </ul>
-      <hr>
-      <div id="twitter">
-        <a href="https://twitter.com/cryptosensebot?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @cryptosensebot</a>
-        <br>
-        <small> <span class="fa fa-twitter"></span> 'We tweet our predictions when we make them!'  <span class="fa fa-twitter"></span></small>
-        <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-      </div>
       <hr>
     </div>
     <div class="center">
@@ -234,14 +191,12 @@
           <h3>Hourly Bitcoin Prices - $USD [Hourly Price]</h3>
           <!-- HOURLY -->
           <div class="chart" id="hourly-graph-price-only"></div>
-          <div class="chart" id="hourly-graph-with-sentiment"></div>
           <!-- END HOURLY -->
         </div>
         <div id="daily-graphs" style="display:none;">
           <!--DAILY -->
           <h3>Daily Bitcoin Prices - $USD [Closing Price]</h3>
           <div class="chart" id="daily-graph-price-only"></div>
-          <div class="chart" id="daily-graph-with-sentiment"></div>
           <!-- END DAILY -->
         </div>
       </div>

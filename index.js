@@ -130,22 +130,6 @@
             percentage: 17,
             date: moment().add(1, "hour").valueOf()
           }
-        ],
-        "priceAndSentiment": [{
-            price: 12000,
-            percentage: 17,
-            date: moment().add(3, "hour").valueOf()
-          },
-          {
-            price: 11522,
-            percentage: 17,
-            date: moment().add(2, "hour").valueOf()
-          },
-          {
-            price: 10501,
-            percentage: 17,
-            date: moment().add(1, "hour").valueOf()
-          }
         ]
       },
       "daily": {
@@ -161,23 +145,7 @@
           price: 12100,
           percentage: 17,
           date: moment().add(1, "day").valueOf()
-        }],
-        priceAndSentiment: [{
-            price: 12500,
-            percentage: 17,
-            date: moment().add(3, "day").valueOf()
-          },
-          {
-            price: 11224,
-            percentage: 19,
-            date: moment().add(2, "day").valueOf()
-          },
-          {
-            price: 10124,
-            percentage: 10,
-            date: moment().add(1, "day").valueOf()
-          }
-        ]
+        }]
       }
     };
 
@@ -201,7 +169,6 @@
 
       //Pull from predictions data and format for use in charts
       var hourlyPricePredictionViaPrices = formatPredictionDataForChart(predictions.hourly.priceOnly);
-      var hourlyPricePredictionViaSentimentAndPrice = formatPredictionDataForChart(predictions.hourly.priceAndSentiment); // This data will be takcked onto the hourlyPriceChartData for 'hourly price AND sentiment chart'
 
       //Display last 30 days for Daily
       var thirtyDaysAgo = moment().subtract(30, "day").unix(); //FOR PYTHON
@@ -212,7 +179,6 @@
 
         //Pull from predictions data and format for use in charts
         var dailyPricePredictionViaPrices = formatPredictionDataForChart(predictions.daily.priceOnly);
-        var dailyPricePredictionViaSentimentAndPrice = formatPredictionDataForChart(predictions.daily.priceAndSentiment);
 
         var nextDayPrediction = predictions.daily.priceOnly[predictions.daily.priceOnly.length - 1];
         var nextHourPrediction = predictions.hourly.priceOnly[predictions.hourly.priceOnly.length - 1]
@@ -220,10 +186,8 @@
           chartData: {
             hourlyPriceData: hourlyPriceData,
             hourlyPredictionPriceOnly: hourlyPricePredictionViaPrices,
-            hourlyPredictionPriceAndSentiment: hourlyPricePredictionViaSentimentAndPrice,
             dailyPriceData: dailyPriceChartData,
-            dailyPredictionPriceOnly: dailyPricePredictionViaPrices,
-            dailyPredictionPriceAndSentiment: dailyPricePredictionViaSentimentAndPrice
+            dailyPredictionPriceOnly: dailyPricePredictionViaPrices
           },
           predictions: predictions,
           nextDayPrediction: nextDayPrediction, //Last prediction we made for daily
