@@ -23,71 +23,52 @@
   app.set('views', __dirname + '/views'); //set views folder
 
 
-  //Historical price (start and end need to be a unix timestamp)
-  var getHistoricalPrice = function(start, end) {
-    return new Promise(function(resolve, reject) {
-      var spawn = require("child_process").spawn;
-      var pythonProcess = spawn(Config.python_cmd, [Config.smsa_repo + "/interfaces/prices.py", "historical", start, end]);
-
-      pythonProcess.stdout.on('data', function(data) {
-
-        // On output (our data)
-        data = JSON.parse(data.toString('utf-8'));
-        resolve(data)
-      });
-
-      pythonProcess.stderr.on('data', function(data) {
-        console.log(data.toString('utf-8'));
-      });
-    });
-  }
-
   //period = "hourly" OR "daily"
   //data is information straight from SMSA and coinmarketcap
   var formatDataForChart = function(period, data) {
-    /*
-    DAILY:
-    Format of data before formatting
-      {'2018-03-02':
-       { crypto: 'BTC',
-         timestamp: 1519966800,
-         close: 11086.4,
-         high: 11189,
-         low: 10850.1,
-         open: 10977.4,
-         usd_market_cap: 185456000000,
-         usd_volume: 7620590000 }
-         ,}
-    */
+    console.log(period, data[0]);
     var formatted = [];
-    if (period == "hourly") {
+    if (period == "hourly" || period == "daily") {
       for (var i = 0; i < data.length; i++) {
         formatted.push([moment(data[i].date).valueOf(), parseFloat(data[i].price)]);
       }
-    } else if (period == "daily") {
-      var dateKeys = Object.keys(data);
-      for (var i = 0; i < dateKeys.length; i++) {
-        var date = dateKeys[i];
-        var timestamp = moment(data[date].timestamp * 1000).valueOf();
-        var price = data[date].close;
-        formatted.push([timestamp, price]);
-      }
-    } else if (period == "tb" || period == "vd") {
-      for (var i = 0; i < data.length; i++) {
-        formatted.push([moment(data[i].date).valueOf(), parseFloat( (period == "tb") ? data[i].tb_polarity : data[i].vader_polarity)]);
-      }
-    }  else {
+    } else {
       console.log("Period needs to be hourly or daily");
     }
     return formatted
   }
 
-  var currentBitcoinPrice = function() {
+  //Returns the prediction data in the chartable format
+  var formatPredictionDataForChart = function(data) {
+    var formatted = [];
+    for (var i = 0; i < data.length; i++) {
+      formatted.push([moment(data[i].date).valueOf(), parseFloat(data[i].price)]);
+    }
+    return formatted;
+  }
+
+  //Historical price (start and end need to be a unix timestamp)
+  var getHistoricalPrice = function(start, end, type) {
+    return new Promise(function(resolve, reject) {
+      Mongoose.connection.db.collection('prices')
+        .find({ "type": type, "$and": [{ "date": { "$gte": start } }, { "date": { "$lte": end } }] })
+        .toArray(function(err, prices) {
+          if (err) {
+            reject(err)
+          } else {
+            resolve(formatDataForChart(type, prices))
+          }
+        });
+    });
+  }
+
+  var getCurrentBitcoinPrice = function() {
     return new Promise(function(resolve, reject) {
       var spawn = require("child_process").spawn;
-      var pythonProcess = spawn(Config.python_cmd, [Config.smsa_repo + "/interfaces/prices.py", "now"]);
+      var pythonProcess = spawn(Config.python_cmd, [Config.smsa_repo + "/interfaces/i_prices.py", "now"]);
 
       pythonProcess.stdout.on('data', function(data) {
+        console.log('data', data)
 
         // On output (our data)
         data = JSON.parse(data.toString('utf-8'));
@@ -100,113 +81,65 @@
     });
   };
 
-  //Returns the prediction data in the chartable format
-  var formatPredictionDataForChart = function(data) {
-    var formatted = [];
-    for (var i = 0; i < data.length; i++) {
-      formatted.push([moment(data[i].date).valueOf(), parseFloat(data[i].price)]);
-    }
-    return formatted;
+  //Get the predictions for the specified type
+  var getPredictions = function(type) {
+    return new Promise(function(resolve, reject) {
+      // CALL MONGODB. Get all the predictions
+      Mongoose.connection.db.collection('predictions')
+        .find({"type": type})
+        .toArray(function(err, predictions) {
+          if (err) {
+            console.log("ERROR getting predictions");
+            reject(err)
+          } else {
+            resolve(formatPredictionDataForChart(predictions))
+          }
+        })
+    });
   }
 
-  //Main homepage view route
-  app.get('/', function(req, res) {
+  //Main route. Simplified using the new async/await
+  app.get('/', async(req, res) => {
+    let today = moment().toDate()
+    let fortyEightHoursAgo = moment().subtract(48, "hour").toDate()
+    let thirtyDaysAgo = moment().subtract(30, "day").toDate()
 
-    //The last predictions for each hourly, daily
-    // TODO, pull this data from mongodb if its being put in there
+    try {
+      //Hourly
+      let historicalHourlyPrices = await getHistoricalPrice(fortyEightHoursAgo, today, "hourly");
+      let hourlyPredictions = await getPredictions("hourly");
 
-    //hourly, daily [2 prediction types] - Each with prediction with sentiment, and prediction without
-    //@NOTE You need to ensure the data is sorted when gathered from MongoDB
-    var predictions = {
-      "hourly": {
-        "priceOnly": [{
-            price: 11000, //Price prediction
-            percentage: 13, //Percentage change based on previous hour
-            date: moment().add(3, "hour").valueOf() //timestamp of when the prediction is for
-          },
-          {
-            price: 12000,
-            percentage: 17,
-            date: moment().add(2, "hour").valueOf()
-          },
-          {
-            price: 10200,
-            percentage: 17,
-            date: moment().add(1, "hour").valueOf()
-          }
-        ]
-      },
-      "daily": {
-        "priceOnly": [{
-          price: 11500,
-          percentage: 17,
-          date: moment().add(3, "day").valueOf()
-        }, {
-          price: 9004,
-          percentage: 17,
-          date: moment().add(2, "day").valueOf()
-        }, {
-          price: 12100,
-          percentage: 17,
-          date: moment().add(1, "day").valueOf()
-        }]
-      }
-    };
+      console.log("HISTORICAL_HOURLY", historicalHourlyPrices.length);
+      console.log("HOURLY_PREDICTIONS", hourlyPredictions.length);
 
-    //PLEASE NOTE:
-    //Temporarily predictions are gonna be some random data (THIS NEEDS TO LATER COME FROM MONGODB)
+      //Daily
+      let historicalDailyPrices = await getHistoricalPrice(thirtyDaysAgo, today, "daily");
+      let dailyPredictions = await getPredictions("daily");
 
-    //The hourly data
-    var hourlyPriceChartData = [];
+      console.log("HISTORICAL_DAILY", historicalDailyPrices.length);
+      console.log("DAILY_PREDICTIONS", dailyPredictions.length);
 
-    //Display last 48 hours for hourly
-    var today = moment().toDate()
-    var fortyEightHoursAgo = moment().subtract(48, "hour").toDate()
-    Mongoose.connection.db.collection('live_tweets_sent').find({
-      $and: [{
-        "date": { "$lte": today }
-      }, {
-        "date": { $gte: fortyEightHoursAgo }
-      }]
-    }).toArray(function(err, hourlyPriceData) {
-      var hourlyTextblobPolarity = formatDataForChart("tb", hourlyPriceData);
-      var hourlyVaderPolarity = formatDataForChart("vd", hourlyPriceData);
-      hourlyPriceData = formatDataForChart("hourly", hourlyPriceData);
+      //Current
+      let currentPrice = await getCurrentBitcoinPrice()
 
-      //Pull from predictions data and format for use in charts
-      var hourlyPricePredictionViaPrices = formatPredictionDataForChart(predictions.hourly.priceOnly);
+      console.log("CURRENT_PRICE", currentPrice)
 
-      //Display last 30 days for Daily
-      var thirtyDaysAgo = moment().subtract(30, "day").unix(); //FOR PYTHON
-      getHistoricalPrice(thirtyDaysAgo, moment(today).unix()).then(function(priceData) {
-        // Format the data we get into daily close data segments : [[timestamp, price], ...]
-        var dailyPriceChartData = formatDataForChart("daily", priceData);
-
-        //Pull from predictions data and format for use in charts
-        var dailyPricePredictionViaPrices = formatPredictionDataForChart(predictions.daily.priceOnly);
-
-        var nextDayPrediction = predictions.daily.priceOnly[predictions.daily.priceOnly.length - 1];
-        var nextHourPrediction = predictions.hourly.priceOnly[predictions.hourly.priceOnly.length - 1]
-        res.render("index.ejs", {
-          chartData: {
-            hourlyPriceData: hourlyPriceData,
-            hourlyPredictionPriceOnly: hourlyPricePredictionViaPrices,
-            dailyPriceData: dailyPriceChartData,
-            dailyPredictionPriceOnly: dailyPricePredictionViaPrices,
-            hourlyTextblobPolarity: hourlyTextblobPolarity,
-            hourlyVaderPolarity: hourlyVaderPolarity
-          },
-          predictions: predictions,
-          nextDayPrediction: nextDayPrediction, //Last prediction we made for daily
-          nextHourPrediction: nextHourPrediction, //Last prediction we made for hourly
-          moment: moment
-        });
+      //Render the page
+      res.render("index.ejs", {
+        currentPrice: currentPrice,
+        historicalHourlyPrices: historicalHourlyPrices,
+        hourlyPredictions: hourlyPredictions,
+        historicalDailyPrices: historicalDailyPrices,
+        dailyPredictions: dailyPredictions,
+        moment: moment
       });
-    });
-  });
+    } catch (e) {
+      res.send(e);
+    }
+  })
 
   app.get("/current-bitcoin-price", function(req, res) {
-    currentBitcoinPrice().then(function(data) {
+    getCurrentBitcoinPrice().then(function(data) {
       res.json(data);
     })
   });

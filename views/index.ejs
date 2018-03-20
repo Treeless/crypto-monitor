@@ -13,7 +13,6 @@
   var state = "hourly"; //Hourly is the default state
   // Button logic to hide and show certain charts
   var buttonLogic = function(e) {
-    console.log("BUTTON CLICKED")
     var id = $(e.currentTarget).attr('id');
     if (id.indexOf('hourly') > -1) {
       if (state != "hourly") {
@@ -42,9 +41,8 @@
   <script type="text/javascript">
   // Page logic (note, themes etc, moved to highchart-theme.js)
   $(function() {
-    var hourlyWithPriceOnly = "hourly-graph-price-only";
-
-    var dailyWithPriceOnly = "daily-graph-price-only";
+    var CHART_hourlyWithPriceOnly = "hourly-graph-price-only";
+    var CHART_dailyWithPriceOnly = "daily-graph-price-only";
 
     var generalPredictionSeriesSettings = {
       name: 'CryptoSense prediction',
@@ -70,84 +68,47 @@
     };
 
     // Chart the hourly (price only)
-    var hourlyPriceData = <%- JSON.stringify(chartData.hourlyPriceData) %>;
-    var hourlyPredictionViaPrice = <%- JSON.stringify(chartData.hourlyPredictionPriceOnly) %>;
-    var chart = Highcharts.chart(hourlyWithPriceOnly, Object.assign({
+    var historicalHourlyPriceData = <%- JSON.stringify(locals.historicalHourlyPrices || []) %>;
+    var hourlyPredictions = <%- JSON.stringify(locals.hourlyPredictions || []) %>;
+    var chart = Highcharts.chart(CHART_hourlyWithPriceOnly, Object.assign({
       title: {
-        text: 'Price of Bitcoin: Hourly [Prediction made using price history]'
+        text: 'Price of Bitcoin: Hourly'
       },
       series: [{
-          name: 'Price (per hour)',
-          data: hourlyPriceData,
+          name: 'Price ($USD)',
+          data: historicalHourlyPriceData,
           tooltip: {
             valueDecimals: 2
           }
         },
         Object.assign({
-          data: hourlyPredictionViaPrice,
+          data: hourlyPredictions,
         }, generalPredictionSeriesSettings)
       ]
     }, generalChartSettings));
 
+    var historicalDailyPriceData = <%- JSON.stringify(locals.historicalDailyPriceData || []) %>;
+    var dailyPredictions = <%- JSON.stringify(locals.dailyPredictions || []) %>;
     // Chart the daily (prediction using price only)
-    chart = Highcharts.chart(dailyWithPriceOnly, Object.assign({
+    chart = Highcharts.chart(CHART_dailyWithPriceOnly, Object.assign({
       title: {
-        text: 'Price of Bitcoin: Daily [Prediction made using Price History]'
+        text: 'Price of Bitcoin: Daily'
       },
       series: [{
-          name: 'USD Price (by day closing price)',
-          data: <%- JSON.stringify(chartData.dailyPriceData) %>,
+          name: 'Price ($USD)',
+          data: historicalDailyPriceData,
           tooltip: {
             valueDecimals: 2
           }
         },
         Object.assign({
-          name: 'CryptoSense prediction',
-          data: <%- JSON.stringify(chartData.dailyPredictionPriceOnly) %>,
+          data: dailyPredictions,
           tooltip: {
             valueDecimals: 2
           }
         }, generalPredictionSeriesSettings)
       ]
     }, generalChartSettings));
-
-    //Chart the sentiment
-    //SENTIMENT CHARTS
-    //Hourly sentiment
-    chart = Highcharts.chart('sentiment-hourly-chart-div', {
-      xAxis: {
-        type: 'datetime'
-      },
-      yAxis: { allowDecimals: Boolean },
-      plotOptions: {
-        line: {
-          marker: {
-            enabled: false
-          }
-        }
-      },
-      title: {
-        text: 'Community Sentiment by Hour'
-      },
-      exporting: { enabled: false },
-      series: [{
-          name: "TextBlob Sentiment",
-          data: <%- JSON.stringify(chartData.hourlyTextblobPolarity) %>,
-          tooltip: {
-            valueDecimals: 4
-          },
-          color: "red"
-        },
-        {
-          name: "Vader Sentiment",
-          data: <%- JSON.stringify(chartData.hourlyVaderPolarity) %>,
-          tooltip: {
-            valueDecimals: 4
-          },
-          color: "yellow"
-        }
-      ]
-    });
   });
   </script>
   <link href="/css/main.css" rel="stylesheet" type="text/css" />
@@ -169,17 +130,6 @@
     <div class="center">
       Realtime Market Bitcoin Price:
       <span id="bitcoin-price">'Loading'</span> USD
-      <div>
-        <div>
-          Hour : <span id="percent-change-hour">.</span>
-        </div>
-        <div>
-          Day: <span id="percent-change-tf">.</span>
-        </div>
-        <div>
-          Week: <span id="percent-change-sd">.</span>
-        </div>
-      </div>
     </div>
   </header>
   <div id="main-container">
@@ -187,68 +137,65 @@
       <div class="prediction-inner">
         <div id="title-container">
           <span id="title">Next Hour's Prediction</span>
-          <div>
-            <span class="fa fa-clock-o"> <%= moment(nextHourPrediction.date).format("YYYY-MM-DD h:mm a") %></span>
+          <% if(locals.hourlyPredictions.length > 0){ %>
             <div>
-              <small>(<%= moment(nextHourPrediction.date).fromNow() %>)</small>
+              <span class="fa fa-clock-o"> <%= moment(hourlyPredictions[0][0]).format("YYYY-MM-DD h:mm a") %></span>
             </div>
-          </div>
-        </div>
-        <div id="prediction-container" class=<%=( (nextHourPrediction.percentage> 0) ? "green-color" : "red-color") %>>
-          <span id="prediction-number">$<%= nextHourPrediction.price.toLocaleString() %></span> | <span id="prediction-percentage-change"><span class='<%= ((nextHourPrediction.percentage > 0) ? "fa fa-arrow-up" : "fa fa-arrow-down") %>'></span>
-          <%= nextHourPrediction.percentage %>%</span>
+            <div id="prediction-container">
+              <span id="prediction-number">$<%= Math.round(hourlyPredictions[0][1], 2).toLocaleString() %></span>
+            </div>
+          <% } else { %>
+            <div>No hourly predictions</div>
+          <% } %>
         </div>
       </div>
       <div class="prediction-inner">
         <div id="title-container">
           <span id="title">Next Days's Prediction</span>
-          <div>
-            <span class="fa fa-clock-o"> <%= moment(nextDayPrediction.date).format("YYYY-MM-DD h:mm a") %></span>
+          <% if(locals.dailyPredictions.length > 0){ %>
             <div>
-              <small>(<%= moment(nextDayPrediction.date).fromNow() %>)</small>
+              <span class="fa fa-clock-o"> <%= moment(dailyPredictions[0][0]).format("YYYY-MM-DD h:mm a") %></span>
             </div>
+            <div id="prediction-container">
+              <span id="prediction-number">$<%= Math.round(dailyPredictions[0][1], 2).toLocaleString() %></span>
+            </div>
+            <% } else { %>
+              <div>No daily predictions</div>
+            <% } %>
+        </div>
+      </div>
+      <div id="prediction-graphs-container">
+        <div>
+          <div class="button-container">
+            <button id="hourly-button" class="active">Hourly Chart</button>
+          </div>
+          <div class="button-container">
+            <button id="daily-button">Daily Chart</button>
           </div>
         </div>
-        <div id="prediction-container" class=<%=( (nextDayPrediction.percentage> 0) ? "green-color" : "red-color") %>>
-          <span id="prediction-number">$<%= nextDayPrediction.price.toLocaleString() %></span> | <span id="prediction-percentage-change"><span class='<%= ((nextDayPrediction.percentage > 0) ? "fa fa-arrow-up" : "fa fa-arrow-down") %>'></span>
-          <%= nextDayPrediction.percentage %>%</span>
+        <div id="graphs-container">
+          <div id="hourly-graphs">
+            <h3>Hourly Bitcoin Prices with predictions</h3>
+            <!-- HOURLY -->
+            <div class="chart" id="hourly-graph-price-only"></div>
+            <!-- END HOURLY -->
+          </div>
+          <div id="daily-graphs" style="display:none;">
+            <!--DAILY -->
+            <h3>Daily Bitcoin Prices with predictions</h3>
+            <div class="chart" id="daily-graph-price-only"></div>
+            <!-- END DAILY -->
+          </div>
         </div>
       </div>
     </div>
-    <div id="prediction-graphs-container">
-      <div>
-        <div class="button-container">
-          <button id="hourly-button" class="active">Hourly Prediction Chart</button>
-        </div>
-        <div class="button-container">
-          <button id="daily-button">Daily Prediction Chart</button>
-        </div>
-      </div>
-      <div id="graphs-container">
-        <div id="hourly-graphs">
-          <h3>Hourly Bitcoin Prices - $USD [Hourly Price]</h3>
-          <!-- HOURLY -->
-          <div class="chart" id="hourly-graph-price-only"></div>
-          <div id="sentiment-hourly-chart-div" class="chart"></div>
-          <span>** We use two sentiment libraries to ensure we can see a correlation in case one is incorrect during a hourly window</span>
-          <!-- END HOURLY -->
-        </div>
-        <div id="daily-graphs" style="display:none;">
-          <!--DAILY -->
-          <h3>Daily Bitcoin Prices - $USD [Closing Price]</h3>
-          <div class="chart" id="daily-graph-price-only"></div>
-          <!-- END DAILY -->
-        </div>
-      </div>
-    </div>
-  </div>
-  <footer>
-    <span>Trent University: COIS-4000Y Software Engineering Project</span>
-    <br>
-    <span>
+    <footer>
+      <span>Trent University: COIS-4000Y Software Engineering Project</span>
+      <br>
+      <span>
         Created by: <a title="Nakul Roghelia" href="https://www.github.com/nhavoc">@nhavoc</a>, <a title="Michael Dragan" href="https://www.github.com/MichaelDragan">@MichaelDragan</a>, <a title="Matthew Rowlandson" href="https://www.github.com/Treeless">@Treeless</a> &amp; <a href="https://www.github.com/sidelaunch" title="Eliot Boyd">@Sidelaunch</a>
       </span>
-  </footer>
+    </footer>
 </body>
 
 </html>
