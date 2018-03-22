@@ -101,12 +101,12 @@
   //Main route. Simplified using the new async/await
   app.get('/', async(req, res) => {
     let today = moment().toDate()
-    let fortyEightHoursAgo = moment().subtract(48, "hour").toDate()
+    let ninetySixHours = moment().subtract(96, "hour").toDate()
     let thirtyDaysAgo = moment().subtract(30, "day").toDate()
 
     try {
       //Hourly
-      let historicalHourlyPrices = await getHistoricalPrice(fortyEightHoursAgo, today, "hourly");
+      let historicalHourlyPrices = await getHistoricalPrice(ninetySixHours, today, "hourly");
       let hourlyPredictions = await getPredictions("hourly");
 
       console.log("HISTORICAL_HOURLY", historicalHourlyPrices.length);
