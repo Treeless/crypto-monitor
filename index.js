@@ -30,7 +30,7 @@
     var formatted = [];
     if (period == "hourly" || period == "daily") {
       for (var i = 0; i < data.length; i++) {
-        formatted.push([moment(data[i].date).valueOf(), parseFloat(data[i].price)]);
+        formatted.push([moment.utc(data[i].date).local().valueOf(), parseFloat(data[i].price)]);
       }
     } else {
       console.log("Period needs to be hourly or daily");
@@ -42,7 +42,7 @@
   var formatPredictionDataForChart = function(data) {
     var formatted = [];
     for (var i = 0; i < data.length; i++) {
-      formatted.push([moment(data[i].date).valueOf(), parseFloat(data[i].price)]);
+      formatted.push([moment.utc(data[i].date).local().valueOf(), parseFloat(data[i].price)]);
     }
     return formatted;
   }
