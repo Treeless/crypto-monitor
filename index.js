@@ -42,7 +42,7 @@
         var timestamp = moment.utc(data[i].date).local().valueOf()
         formatted[0].push([timestamp, parseFloat(data[i].tb_polarity)]); //TextBlob
         formatted[1].push([timestamp, parseFloat(data[i].vader_polarity)]); //Vader
-        formatted[2].push([timestamp, parseFloat(data[i].tweet_count)]); //Number of tweets
+        formatted[2].push([timestamp, parseInt(data[i].tweet_count)]); //Number of tweets
       }
     } else {
       console.log("Period needs to be hourly or daily or sentiment");
@@ -126,9 +126,9 @@
 
   //Main route. Simplified using the new async/await
   app.get('/', async(req, res) => {
-    let today = moment(moment().valueOf()).toDate()
-    let ninetySixHours = moment(moment().subtract(96, "hour").valueOf()).toDate()
-    let thirtyDaysAgo = moment(moment().subtract(30, "day").valueOf()).toDate()
+    let today = moment().toDate()
+    let ninetySixHours = moment().subtract(96, "hour").toDate()
+    let thirtyDaysAgo = moment().subtract(30, "day").toDate()
 
     try {
       //Hourly

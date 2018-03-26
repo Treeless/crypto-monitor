@@ -93,7 +93,7 @@
 
     var textblobData = <%- JSON.stringify(locals.sentimentChartData[0] || []) %>;
     var vaderData = <%- JSON.stringify(locals.sentimentChartData[1] || []) %>;
-    var hourlyTweetCount = <%- JSON.stringify(locals.sentimentChartData[3] || []) %>;
+    var hourlyTweetCount = <%- JSON.stringify(locals.sentimentChartData[2] || []) %>;
 
     // Chart the sentiment
     chart = Highcharts.chart(CHART_hourlySentiment, Object.assign({
