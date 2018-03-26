@@ -1,11 +1,40 @@
+@import url('https://fonts.googleapis.com/css?family=Raleway');
+
 header {
   background-color: lightgray;
   padding: 20px;
-  border-radius: 30px;
+  border-radius: 2px;
 }
 
 #twitter {
   text-align: center;
+}
+
+#bitcoin-header-container {
+  max-width: 500px;
+  width: 20%;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  text-align: center;
+  img {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+#realtime-price-container {
+  margin-top: 10px;
+  margin-bottom: 15px;
+  #label {
+    font-size: 18px;
+    font-style: underline;
+  }
+  #bitcoin-price {
+    display: block;
+    font-size: 28px;
+    cursor: help;
+  }
 }
 
 #prediction-type-container {
@@ -18,13 +47,14 @@ header {
     border: 1px solid black;
     height: 150px;
     text-align: center;
-    border-radius: 10px;
+    border-radius: 2px;
     #title-container {
       margin: 10px;
       font-size: 24px;
       #title {
         font-size: 26px;
         font-style: oblique;
+        margin:0
       }
     }
     #prediction-container {
@@ -44,7 +74,7 @@ header {
     margin-right: 2%;
     text-align: center;
     border-radius: 10px;
-    button{
+    button {
       padding: 15px;
       color: white;
       background-color: orange;
@@ -53,8 +83,8 @@ header {
       cursor: pointer;
     }
 
-    .active{
-      background-color:darkorange;
+    .active {
+      background-color: darkorange;
       border: 2px solid gray;
     }
   }
@@ -80,14 +110,15 @@ header {
   width: 75%;
   min-width: 600px;
   padding: 15px;
-  border-radius: 30px;
+  border-radius: 2px;
   border: 1px solid gray;
   margin-top: 10px;
   margin-bottom: 10px;
+  background-color: rgba(150, 150, 150, 0.2)
 }
 
-#graphs-container{
-  h3{
+#graphs-container {
+  h3 {
     text-align: center;
     font-size: 24px;
   }
@@ -98,13 +129,13 @@ header {
 }
 
 #main-container .highcharts-container {
-  border-radius: 10px;
+  border-radius: 2px;
 }
 
 #main-container .chart {
   height: 250px;
   max-width: 1000px;
-  margin:10px;
+  margin: 10px;
   margin-left: auto;
   margin-right: auto;
 }
@@ -117,12 +148,33 @@ header {
 }
 
 #crypto-sense-logo-container img {
-  border-radius: 90px;
+  border-radius: 5px;
   width: 70%;
   max-width: 1500px;
   margin-left: auto;
   margin-right: auto;
   display: inherit;
+}
+
+h1,h2,h3{
+  font-family: 'Raleway', sans-serif;
+}
+
+#expl{
+  font-size: 26px;
+  display:block;
+  margin-left: auto;
+  margin-right:auto;
+  background-color:white;
+  min-width: 300px;
+  width: 75%;
+  border-radius: 15px;
+  text-align: center;
+}
+
+#links-container{
+  font-family: 'Raleway', sans-serif;
+  font-size: 16px;
 }
 
 #links-container ul {
