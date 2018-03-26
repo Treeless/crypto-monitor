@@ -22,18 +22,30 @@
   app.set('view engine', 'ejs'); //Set the view engine
   app.set('views', __dirname + '/views'); //set views folder
 
-
   //period = "hourly" OR "daily"
   //data is information straight from SMSA and coinmarketcap
   var formatDataForChart = function(period, data) {
-    console.log(period, data[0]);
     var formatted = [];
     if (period == "hourly" || period == "daily") {
       for (var i = 0; i < data.length; i++) {
         formatted.push([moment.utc(data[i].date).local().valueOf(), parseFloat(data[i].price)]);
       }
+    } else if (period == "sentiment") {
+      // We need to create two arrays, each with their own type of sentiment data
+      formatted = [
+        [],
+        [],
+        []
+      ]
+      console.log("sentiment formatting")
+      for (var i = 0; i < data.length; i++) {
+        var timestamp = moment.utc(data[i].date).local().valueOf()
+        formatted[0].push([timestamp, parseFloat(data[i].tb_polarity)]); //TextBlob
+        formatted[1].push([timestamp, parseFloat(data[i].vader_polarity)]); //Vader
+        formatted[2].push([timestamp, parseFloat(data[i].tweet_count)]); //Number of tweets
+      }
     } else {
-      console.log("Period needs to be hourly or daily");
+      console.log("Period needs to be hourly or daily or sentiment");
     }
     return formatted
   }
@@ -45,6 +57,20 @@
       formatted.push([moment.utc(data[i].date).local().valueOf(), parseFloat(data[i].price)]);
     }
     return formatted;
+  }
+
+  var getSentimentData = function(start, end) {
+    return new Promise(function(resolve, reject) {
+      Mongoose.connection.db.collection('twitter_sentiment')
+        .find({"$and": [{ "date": { "$gte": start } }, { "date": { "$lte": end } }] })
+        .toArray(function(err, sentimentData) {
+          if (err) {
+            reject(err)
+          } else {
+            resolve(formatDataForChart("sentiment", sentimentData))
+          }
+        });
+    });
   }
 
   //Historical price (start and end need to be a unix timestamp)
@@ -86,7 +112,7 @@
     return new Promise(function(resolve, reject) {
       // CALL MONGODB. Get all the predictions
       Mongoose.connection.db.collection('predictions')
-        .find({"type": type})
+        .find({ "type": type })
         .toArray(function(err, predictions) {
           if (err) {
             console.log("ERROR getting predictions");
@@ -100,9 +126,9 @@
 
   //Main route. Simplified using the new async/await
   app.get('/', async(req, res) => {
-    let today = moment().toDate()
-    let ninetySixHours = moment().subtract(96, "hour").toDate()
-    let thirtyDaysAgo = moment().subtract(30, "day").toDate()
+    let today = moment(moment().valueOf()).toDate()
+    let ninetySixHours = moment(moment().subtract(96, "hour").valueOf()).toDate()
+    let thirtyDaysAgo = moment(moment().subtract(30, "day").valueOf()).toDate()
 
     try {
       //Hourly
@@ -111,6 +137,11 @@
 
       console.log("HISTORICAL_HOURLY", historicalHourlyPrices.length);
       console.log("HOURLY_PREDICTIONS", hourlyPredictions.length);
+
+      //Get sentiment
+      let sentimentChartData = await getSentimentData(ninetySixHours, today); //array of 3 arrays (textblob, vader, tweetcount)
+
+      console.log("SENTIMENT_HOURLY", sentimentChartData.length);
 
       //Daily
       let historicalDailyPrices = await getHistoricalPrice(thirtyDaysAgo, today, "daily");
@@ -129,6 +160,7 @@
         currentPrice: currentPrice,
         historicalHourlyPrices: historicalHourlyPrices,
         hourlyPredictions: hourlyPredictions,
+        sentimentChartData: sentimentChartData,
         historicalDailyPrices: historicalDailyPrices,
         dailyPredictions: dailyPredictions,
         moment: moment

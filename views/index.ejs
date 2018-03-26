@@ -87,6 +87,55 @@
       ]
     }, generalChartSettings));
 
+    //SENTIMENT
+    var CHART_hourlySentiment = "hourly-sentiment";
+    var CHART_hourlyTweetCount = "hourly-tweet-count";
+
+    var textblobData = <%- JSON.stringify(locals.sentimentChartData[0] || []) %>;
+    var vaderData = <%- JSON.stringify(locals.sentimentChartData[1] || []) %>;
+    var hourlyTweetCount = <%- JSON.stringify(locals.sentimentChartData[3] || []) %>;
+
+    // Chart the sentiment
+    chart = Highcharts.chart(CHART_hourlySentiment, Object.assign({
+      title: {
+        text: 'Twitter Sentiment'
+      },
+      series: [{
+          name: 'Textblob',
+          data: textblobData,
+          color: "red",
+          tooltip: {
+            valueDecimals: 6
+          }
+        },
+        {
+          name: "Vader",
+          color: "yellow",
+          data: vaderData,
+          tooltip: {
+            valueDecimals: 6
+          }
+        }
+      ]
+    }, generalChartSettings));
+
+    //Chart the tweet count
+    chart = Highcharts.chart(CHART_hourlyTweetCount, Object.assign({
+      title: {
+        text: 'Tweets'
+      },
+      series: [{
+        name: 'Count',
+        data: hourlyTweetCount,
+        color: "blue",
+        tooltip: {
+          valueDecimals: 2
+        }
+      }]
+    }, generalChartSettings));
+
+
+    //DAILY
     var historicalDailyPriceData = <%- JSON.stringify(locals.historicalDailyPriceData || []) %>;
     var dailyPredictions = <%- JSON.stringify(locals.dailyPredictions || []) %>;
     // Chart the daily (prediction using price only)
@@ -109,6 +158,7 @@
         }, generalPredictionSeriesSettings)
       ]
     }, generalChartSettings));
+
   });
   </script>
   <link href="/css/main.css" rel="stylesheet" type="text/css" />
@@ -144,9 +194,9 @@
             <div id="prediction-container">
               <span id="prediction-number">$<%= Math.round(hourlyPredictions[0][1], 2).toLocaleString() %></span>
             </div>
-          <% } else { %>
-            <div>No hourly predictions</div>
-          <% } %>
+            <% } else { %>
+              <div>No hourly predictions</div>
+              <% } %>
         </div>
       </div>
       <div class="prediction-inner">
@@ -161,7 +211,7 @@
             </div>
             <% } else { %>
               <div>No daily predictions</div>
-            <% } %>
+              <% } %>
         </div>
       </div>
       <div id="prediction-graphs-container">
@@ -178,6 +228,8 @@
             <h3>Hourly Bitcoin Prices with predictions</h3>
             <!-- HOURLY -->
             <div class="chart" id="hourly-graph-price-only"></div>
+            <div class="chart" id="hourly-sentiment"></div>
+            <div class="chart" id="hourly-tweet-count"></div>
             <!-- END HOURLY -->
           </div>
           <div id="daily-graphs" style="display:none;">
