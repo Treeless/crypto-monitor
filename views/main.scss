@@ -1,9 +1,38 @@
-@import url('https://fonts.googleapis.com/css?family=Raleway');
+@import url('https://fonts.googleapis.com/css?family=Raleway|Lato');
+
+body {
+  span,
+  p {
+    font-family: 'Lato', sans-serif;
+  }
+}
 
 header {
-  background-color: lightgray;
+  background-color: rgba(150, 150, 150, 0.2);
   padding: 20px;
   border-radius: 2px;
+}
+
+#top-right-triangle {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 160px 160px 0 0;
+  border-color: rgba(150, 150, 150, 0.2) transparent transparent transparent;
+  -webkit-transform: rotate(360deg);
+  position: absolute;
+  right: 10.5px;
+}
+
+#top-left-triangle {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 160px 160px 0;
+  border-color: transparent rgba(150, 150, 150, 0.2) transparent transparent;
+  -webkit-transform: rotate(360deg);
+  position: absolute;
+  left: 10.5px;
 }
 
 #twitter {
@@ -44,17 +73,17 @@ header {
     vertical-align: top;
     width: 45%;
     margin: 2%;
-    border: 1px solid black;
     height: 150px;
     text-align: center;
-    border-radius: 2px;
+    border-radius: 6px;
+    background-color: white;
     #title-container {
       margin: 10px;
       font-size: 24px;
       #title {
         font-size: 26px;
         font-style: oblique;
-        margin:0
+        margin: 0
       }
     }
     #prediction-container {
@@ -111,8 +140,6 @@ header {
   min-width: 600px;
   padding: 15px;
   border-radius: 2px;
-  border: 1px solid gray;
-  margin-top: 10px;
   margin-bottom: 10px;
   background-color: rgba(150, 150, 150, 0.2)
 }
@@ -156,23 +183,25 @@ header {
   display: inherit;
 }
 
-h1,h2,h3{
+h1,
+h2,
+h3 {
   font-family: 'Raleway', sans-serif;
 }
 
-#expl{
+#expl {
   font-size: 26px;
-  display:block;
+  display: block;
   margin-left: auto;
-  margin-right:auto;
-  background-color:white;
+  margin-right: auto;
+  background-color: white;
   min-width: 300px;
   width: 75%;
   border-radius: 15px;
   text-align: center;
 }
 
-#links-container{
+#links-container {
   font-family: 'Raleway', sans-serif;
   font-size: 16px;
 }
@@ -225,8 +254,22 @@ h1,h2,h3{
 footer {
   background-color: lightgray;
   padding: 20px;
-  border-radius: 30px;
+  border-radius: 4px;
   text-align: center;
+  a {
+    text-decoration: none;
+  }
+  ul {
+    text-align: center;
+    margin: 0;
+    margin-top: 10px;
+    li {
+      list-style: none;
+      display: inline;
+      margin-left: 10px;
+      margin-right: 10px;
+    }
+  }
 }
 
 //
