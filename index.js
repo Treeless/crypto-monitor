@@ -133,7 +133,7 @@
     try {
       //Hourly
       let historicalHourlyPrices = await getHistoricalPrice(ninetySixHours, today, "hourly");
-      let hourlyPredictions = await getPredictions("hourly", today, ninetySixHours);
+      let hourlyPredictions = await getPredictions("hourly", ninetySixHours, today);
 
       //Next hour's prediction
       var nextHourPrediction = null;
@@ -159,7 +159,7 @@
 
       //Daily
       let historicalDailyPrices = await getHistoricalPrice(thirtyDaysAgo, today, "daily");
-      let dailyPredictions = await getPredictions("daily", today, thirtyDaysAgo);
+      let dailyPredictions = await getPredictions("daily", thirtyDaysAgo, today);
 
       console.log("HISTORICAL_DAILY", historicalDailyPrices.length);
       console.log("DAILY_PREDICTIONS", dailyPredictions.length);
