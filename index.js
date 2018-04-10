@@ -137,7 +137,7 @@
 
       //Next hour's prediction
       var nextHourPrediction = null;
-      var nextHour = moment().add(1, "hour")
+      var nextHour = moment().utc().add(1, "hour")
       for (var i = 0; i < hourlyPredictions.length; i++) {
         // Find the prediction where the date matches the current date
         var same = moment(hourlyPredictions[i][0]).isSame(nextHour);
