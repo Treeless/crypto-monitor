@@ -138,7 +138,7 @@
 
 
     //DAILY
-    var historicalDailyPriceData = <%- JSON.stringify(locals.historicalDailyPriceData || []) %>;
+    var historicalDailyPriceData = <%- JSON.stringify(locals.historicalDailyPrices || []) %>;
     var dailyPredictions = <%- JSON.stringify(locals.dailyPredictions || []) %>;
     // Chart the daily (prediction using price only)
     chart = Highcharts.chart(CHART_dailyWithPriceOnly, Object.assign({
@@ -206,7 +206,8 @@
               <span id="prediction-number">$<%= Math.round(nextHourPrediction[0], 2).toLocaleString() %></span>
             </div>
             <% } else { %>
-              <div>No hourly predictions</div>
+              <div>No next hour predictions</div>
+              <div><small>Prediction algo running...</small></div>
               <% } %>
         </div>
       </div>
