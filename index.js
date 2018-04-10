@@ -62,7 +62,7 @@
   var getSentimentData = function(start, end) {
     return new Promise(function(resolve, reject) {
       Mongoose.connection.db.collection('twitter_sentiment')
-        .find({"$and": [{ "date": { "$gte": start } }, { "date": { "$lte": end } }] })
+        .find({ "$and": [{ "date": { "$gte": start } }, { "date": { "$lte": end } }] })
         .toArray(function(err, sentimentData) {
           if (err) {
             reject(err)
@@ -108,11 +108,11 @@
   };
 
   //Get the predictions for the specified type
-  var getPredictions = function(type) {
+  var getPredictions = function(type, start, end) {
     return new Promise(function(resolve, reject) {
       // CALL MONGODB. Get all the predictions
       Mongoose.connection.db.collection('predictions')
-        .find({ "type": type })
+        .find({ "type": type, "$and": [{ "date": { "$gte": start } }, { "date": { "$lte": end } }] })
         .toArray(function(err, predictions) {
           if (err) {
             console.log("ERROR getting predictions");
@@ -133,7 +133,21 @@
     try {
       //Hourly
       let historicalHourlyPrices = await getHistoricalPrice(ninetySixHours, today, "hourly");
-      let hourlyPredictions = await getPredictions("hourly");
+      let hourlyPredictions = await getPredictions("hourly", today, ninetySixHours);
+
+      //Next hour's prediction
+      var nextHourPrediction = null;
+      var nextHour = moment().add(1, "hour")
+      for (var i = 0; i < hourlyPredictions.length; i++) {
+        // Find the prediction where the date matches the current date
+        var same = moment(hourlyPredictions[i][0]).isSame(nextHour);
+        if (same) {
+          console.log("found next hour's prediction")
+          nextHourPrediction = hourlyPredictions[i];
+          break;
+        }
+      }
+      //
 
       console.log("HISTORICAL_HOURLY", historicalHourlyPrices.length);
       console.log("HOURLY_PREDICTIONS", hourlyPredictions.length);
@@ -145,7 +159,7 @@
 
       //Daily
       let historicalDailyPrices = await getHistoricalPrice(thirtyDaysAgo, today, "daily");
-      let dailyPredictions = await getPredictions("daily");
+      let dailyPredictions = await getPredictions("daily", today, thirtyDaysAgo);
 
       console.log("HISTORICAL_DAILY", historicalDailyPrices.length);
       console.log("DAILY_PREDICTIONS", dailyPredictions.length);
@@ -160,6 +174,7 @@
         currentPrice: currentPrice,
         historicalHourlyPrices: historicalHourlyPrices,
         hourlyPredictions: hourlyPredictions,
+        nextHourPrediction: nextHourPrediction,
         sentimentChartData: sentimentChartData,
         historicalDailyPrices: historicalDailyPrices,
         dailyPredictions: dailyPredictions,

@@ -64,6 +64,8 @@
       }
     };
 
+    var charts = []
+
     // Chart the hourly (price only)
     var historicalHourlyPriceData = <%- JSON.stringify(locals.historicalHourlyPrices || []) %>;
     var hourlyPredictions = <%- JSON.stringify(locals.hourlyPredictions || []) %>;
@@ -83,6 +85,7 @@
         }, generalPredictionSeriesSettings)
       ]
     }, generalChartSettings));
+    charts.push(chart);
 
     //SENTIMENT
     var CHART_hourlySentiment = "hourly-sentiment";
@@ -115,6 +118,7 @@
         }
       ]
     }, generalChartSettings));
+    charts.push(chart);
 
     //Chart the tweet count
     chart = Highcharts.chart(CHART_hourlyTweetCount, Object.assign({
@@ -130,6 +134,7 @@
         }
       }]
     }, generalChartSettings));
+    charts.push(chart);
 
 
     //DAILY
@@ -155,6 +160,14 @@
         }, generalPredictionSeriesSettings)
       ]
     }, generalChartSettings));
+    charts.push(chart);
+
+    //Fix the chart sizing issues
+    setTimeout(function() {
+      for (var i = 0; i < charts.length; i++) {
+        charts[i].reflow(); //resize
+      }
+    }, 2000);
 
   });
   </script>

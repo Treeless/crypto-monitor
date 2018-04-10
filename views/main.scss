@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css?family=Raleway|Lato');
 
+$background: #EAEAEA;
+
 body {
   span,
   p {
@@ -8,7 +10,7 @@ body {
 }
 
 header {
-  background-color: #EAEAEA;
+  background-color: $background;
   padding: 20px;
   border-radius: 2px;
 }
@@ -18,7 +20,7 @@ header {
   height: 0;
   border-style: solid;
   border-width: 170px 170px 0 0;
-  border-color: #EAEAEA transparent transparent transparent;
+  border-color: $background transparent transparent transparent;
   -webkit-transform: rotate(360deg);
   position: absolute;
   right: 10.5px;
@@ -29,7 +31,7 @@ header {
   height: 0;
   border-style: solid;
   border-width: 0 170px 170px 0;
-  border-color: transparent #EAEAEA transparent transparent;
+  border-color: transparent $background transparent transparent;
   -webkit-transform: rotate(360deg);
   position: absolute;
   left: 10.5px;
@@ -141,7 +143,7 @@ header {
   padding: 15px;
   border-radius: 2px;
   margin-bottom: 10px;
-  background-color: #EAEAEA;
+  background-color: $background;
 }
 
 #graphs-container {
