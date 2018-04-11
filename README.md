@@ -1,3 +1,5 @@
+<img src="https://raw.githubusercontent.com/Treeless/crypto-monitor/master/public/crypto-sense-header.png" width="75%" style="margin-left:auto; margin-right:auto;" />
+
 # Cryptosense: Frontend for TrentU 4000Y Course project
 Author: Matthew Rowlandson @Treeless
 
