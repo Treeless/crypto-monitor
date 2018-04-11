@@ -35,7 +35,7 @@
       formatted.push([], []);
       for (var i = 0; i < data.length; i++) {
         formatted[0].push([moment.utc(data[i].date).local().valueOf(), parseFloat(data[i].high)]);
-        formatted[1].push([moment.utc(data[i].date).local().valueOf(), parseFloat(data[i].low)]);
+        formatted[1].push([moment.utc(data[i].date).local().valueOf(), parseFloat(data[i].lowPrice)]);
       }
     } else if (period == "sentiment") {
       // We need to create two arrays, each with their own type of sentiment data plus 1 array with tweet count
