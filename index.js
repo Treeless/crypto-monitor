@@ -26,12 +26,19 @@
   //data is information straight from SMSA and coinmarketcap
   var formatDataForChart = function(period, data) {
     var formatted = [];
-    if (period == "hourly" || period == "daily") {
+    if (period == "hourly") {
       for (var i = 0; i < data.length; i++) {
         formatted.push([moment.utc(data[i].date).local().valueOf(), parseFloat(data[i].price)]);
       }
+    } else if(period == "daily"){
+      // Has two series, high and low
+      formatted.push([], []);
+      for (var i = 0; i < data.length; i++) {
+        formatted[0].push([moment.utc(data[i].date).local().valueOf(), parseFloat(data[i].high)]);
+        formatted[1].push([moment.utc(data[i].date).local().valueOf(), parseFloat(data[i].low)]);
+      }
     } else if (period == "sentiment") {
-      // We need to create two arrays, each with their own type of sentiment data
+      // We need to create two arrays, each with their own type of sentiment data plus 1 array with tweet count
       formatted = [
         [],
         [],

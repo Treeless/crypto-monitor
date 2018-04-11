@@ -48,7 +48,8 @@
       name: 'CryptoSense prediction',
       tooltip: {
         valueDecimals: 2
-      }
+      },
+      color: "lightgreen"
     };
     var generalChartSettings = {
       xAxis: {
@@ -143,14 +144,23 @@
     // Chart the daily (prediction using price only)
     chart = Highcharts.chart(CHART_dailyWithPriceOnly, Object.assign({
       title: {
-        text: 'Price of Bitcoin: Daily'
+        text: '($USD) Price of Bitcoin: Daily'
       },
       series: [{
-          name: 'Price ($USD)',
-          data: historicalDailyPriceData,
+          name: 'High',
+          data: historicalDailyPriceData[0],
           tooltip: {
             valueDecimals: 2
-          }
+          },
+          color: "red"
+        },
+        {
+          name: 'Low',
+          data: historicalDailyPriceData[1],
+          tooltip: {
+            valueDecimals: 2
+          },
+          color: "yellow"
         },
         Object.assign({
           data: dailyPredictions,
