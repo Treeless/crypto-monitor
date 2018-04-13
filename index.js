@@ -30,7 +30,7 @@
       for (var i = 0; i < data.length; i++) {
         formatted.push([moment.utc(data[i].date).local().valueOf(), parseFloat(data[i].price)]);
       }
-    } else if(period == "daily"){
+    } else if (period == "daily") {
       // Has two series, high and low
       formatted.push([], []);
       for (var i = 0; i < data.length; i++) {
@@ -119,7 +119,7 @@
     return new Promise(function(resolve, reject) {
       // CALL MONGODB. Get all the predictions
       Mongoose.connection.db.collection('predictions')
-        .find({ "type": type, "$and": [{ "date": { "$gte": start } }, { "date": { "$lte": end } }] })
+        .find({ "type": type, "date": { "$gte": start } })
         .toArray(function(err, predictions) {
           if (err) {
             console.log("ERROR getting predictions");
