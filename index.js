@@ -142,18 +142,55 @@
       let historicalHourlyPrices = await getHistoricalPrice(ninetySixHours, today, "hourly");
       let hourlyPredictions = await getPredictions("hourly", ninetySixHours, today);
 
-      //Next hour's prediction
+
+      //Rather then next hour's prediction. Say next prediction 1 hour after prices
       var nextHourPrediction = null;
-      var nextHour = moment().utc().add(1, "hour")
+      var lastPrice = historicalHourlyPrices[historicalHourlyPrices.length - 1];
+      var lastDate = moment(lastPrice[0]);
+      var nextHour = lastDate.add(1, "hour")
       for (var i = 0; i < hourlyPredictions.length; i++) {
-        // Find the prediction where the date matches the current date
-        var same = moment(hourlyPredictions[i][0]).isSame(nextHour);
+        var time = moment(hourlyPredictions[i][0])
+
+        console.log(time.year(), nextHour.year())
+        var year = time.year() == nextHour.year()
+        var month = time.month() == nextHour.month()
+        var day = time.day() == nextHour.day()
+        var hour = time.hour() == nextHour.hour()
+        var same = year && month && day && hour;
         if (same) {
           console.log("found next hour's prediction")
           nextHourPrediction = hourlyPredictions[i];
           break;
+        } else if (year && month && day) {
+          // Just check if its after the last hour
+          if (time.hour() > nextHour.hour()) {
+            // Lets use it
+            console.log("couldn't find next hour but this works...")
+            nextHourPrediction = hourlyPredictions[i];
+            break;
+          }
         }
       }
+      //
+
+      //Next hour's prediction
+      // var nextHourPrediction = null;
+      // var nextHour = moment().utc().add(1, "hour")
+      // for (var i = 0; i < hourlyPredictions.length; i++) {
+      //   // Find the prediction where the date matches the current date
+      //   var time = moment(hourlyPredictions[i][0])
+
+      //   var year = time.year() == nextHour.year()
+      //   var month = time.month() == nextHour.month()
+      //   var day = time.day() == nextHour.day()
+      //   var hour = time.hour() == nextHour.hour()
+      //   var same = year && month && day && hour;
+      //   if (same) {
+      //     console.log("found next hour's prediction")
+      //     nextHourPrediction = hourlyPredictions[i];
+      //     break;
+      //   }
+      // }
       //
 
       console.log("HISTORICAL_HOURLY", historicalHourlyPrices.length);

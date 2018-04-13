@@ -207,32 +207,37 @@
     <div id="prediction-type-container">
       <div class="prediction-inner">
         <div id="title-container">
-          <h2 id="title">Next Hour's Prediction</h2>
+          <h2 id="title">Last Hourly Prediction</h2>
           <% if(locals.nextHourPrediction){ %>
             <div>
               <span class="fa fa-clock-o"> <%= moment(nextHourPrediction[0]).format("YYYY-MM-DD h:mm a") %></span>
             </div>
+            <div>
+              <small><%= moment(nextHourPrediction[0]).from(Date.now()) %></small>
+            </div>
             <div id="prediction-container">
-              <span id="prediction-number">$<%= Math.round(nextHourPrediction[0], 2).toLocaleString() %></span>
+              <span id="prediction-number">$<%= Math.round(nextHourPrediction[1], 2).toLocaleString() %></span>
             </div>
             <% } else { %>
-              <div>No next hour predictions</div>
-              <div><small>Prediction algo running...</small></div>
+              <div>No predictions</div>
               <% } %>
         </div>
       </div>
       <div class="prediction-inner">
         <div id="title-container">
-          <h2 id="title">Next Days's Prediction</h2>
+          <h2 id="title">Last Daily Prediction</h2>
           <% if(locals.dailyPredictions.length > 0){ %>
             <div>
               <span class="fa fa-clock-o"> <%= moment(dailyPredictions[0][0]).format("YYYY-MM-DD h:mm a") %></span>
             </div>
+            <div>
+              <small><%= moment(dailyPredictions[0][0]).from(moment(Date.now())) %></small>
+            </div>
             <div id="prediction-container">
               <span id="prediction-number">$<%= Math.round(dailyPredictions[0][1], 2).toLocaleString() %></span>
             </div>
-            <% } else { %>
-              <div>No daily predictions</div>
+            <% } else { %>  
+              <div>No prediction</div>
               <% } %>
         </div>
       </div>
