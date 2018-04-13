@@ -151,7 +151,6 @@
       for (var i = 0; i < hourlyPredictions.length; i++) {
         var time = moment(hourlyPredictions[i][0])
 
-        console.log(time.year(), nextHour.year())
         var year = time.year() == nextHour.year()
         var month = time.month() == nextHour.month()
         var day = time.day() == nextHour.day()
@@ -173,26 +172,6 @@
       }
       //
 
-      //Next hour's prediction
-      // var nextHourPrediction = null;
-      // var nextHour = moment().utc().add(1, "hour")
-      // for (var i = 0; i < hourlyPredictions.length; i++) {
-      //   // Find the prediction where the date matches the current date
-      //   var time = moment(hourlyPredictions[i][0])
-
-      //   var year = time.year() == nextHour.year()
-      //   var month = time.month() == nextHour.month()
-      //   var day = time.day() == nextHour.day()
-      //   var hour = time.hour() == nextHour.hour()
-      //   var same = year && month && day && hour;
-      //   if (same) {
-      //     console.log("found next hour's prediction")
-      //     nextHourPrediction = hourlyPredictions[i];
-      //     break;
-      //   }
-      // }
-      //
-
       console.log("HISTORICAL_HOURLY", historicalHourlyPrices.length);
       console.log("HOURLY_PREDICTIONS", hourlyPredictions.length);
 
@@ -208,6 +187,35 @@
       console.log("HISTORICAL_DAILY", historicalDailyPrices.length);
       console.log("DAILY_PREDICTIONS", dailyPredictions.length);
 
+      // Get next day's prediction (i know, duplicate code sucks, timecrunch ;) 
+      var nextDailyPrediction = null;
+      var lastPrice = historicalDailyPrices[historicalDailyPrices.length - 1];
+      var lastDate = moment(lastPrice[0]);
+      var nextHour = lastDate.add(1, "hour")
+      for (var i = 0; i < dailyPredictions.length; i++) {
+        var time = moment(dailyPredictions[i][0])
+
+        var year = time.year() == nextHour.year()
+        var month = time.month() == nextHour.month()
+        var day = time.day() == nextHour.day()
+        var hour = time.hour() == nextHour.hour()
+        var same = year && month && day && hour;
+        if (same) {
+          console.log("found next hour's prediction")
+          nextDailyPrediction = dailyPredictions[i];
+          break;
+        } else if (year && month && day) {
+          // Just check if its after the last hour
+          if (time.hour() > nextHour.hour()) {
+            // Lets use it
+            console.log("couldn't find next hour but this works...")
+            nextDailyPrediction = dailyPredictions[i];
+            break;
+          }
+        }
+      }
+      //
+
       //Current
       let currentPrice = await getCurrentBitcoinPrice()
 
@@ -222,6 +230,7 @@
         sentimentChartData: sentimentChartData,
         historicalDailyPrices: historicalDailyPrices,
         dailyPredictions: dailyPredictions,
+        nextDailyPrediction: nextDailyPrediction,
         moment: moment
       });
     } catch (e) {
