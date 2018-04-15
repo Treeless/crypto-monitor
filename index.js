@@ -134,13 +134,13 @@
   //Main route. Simplified using the new async/await
   app.get('/', async(req, res) => {
     let today = moment().toDate()
-    let ninetySixHours = moment().subtract(96, "hour").toDate()
-    let thirtyDaysAgo = moment().subtract(30, "day").toDate()
+    let houlyMinDate = moment().subtract(200, "hour").toDate()
+    let dailyMinDate = moment().subtract(30, "day").toDate()
 
     try {
       //Hourly
-      let historicalHourlyPrices = await getHistoricalPrice(ninetySixHours, today, "hourly");
-      let hourlyPredictions = await getPredictions("hourly", ninetySixHours, today);
+      let historicalHourlyPrices = await getHistoricalPrice(houlyMinDate, today, "hourly");
+      let hourlyPredictions = await getPredictions("hourly", houlyMinDate, today);
 
 
       //Rather then next hour's prediction. Say next prediction 1 hour after prices
@@ -176,13 +176,13 @@
       console.log("HOURLY_PREDICTIONS", hourlyPredictions.length);
 
       //Get sentiment
-      let sentimentChartData = await getSentimentData(ninetySixHours, today); //array of 3 arrays (textblob, vader, tweetcount)
+      let sentimentChartData = await getSentimentData(houlyMinDate, today); //array of 3 arrays (textblob, vader, tweetcount)
 
       console.log("SENTIMENT_HOURLY", sentimentChartData.length);
 
       //Daily
-      let historicalDailyPrices = await getHistoricalPrice(thirtyDaysAgo, today, "daily");
-      let dailyPredictions = await getPredictions("daily", thirtyDaysAgo, today);
+      let historicalDailyPrices = await getHistoricalPrice(dailyMinDate, today, "daily");
+      let dailyPredictions = await getPredictions("daily", dailyMinDate, today);
 
       console.log("HISTORICAL_DAILY", historicalDailyPrices.length);
       console.log("DAILY_PREDICTIONS", dailyPredictions.length);
