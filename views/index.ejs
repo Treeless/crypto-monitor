@@ -49,7 +49,7 @@
       tooltip: {
         valueDecimals: 2
       },
-      color: "#66d9ef",
+      color: "#ff76ef",
     };
     var generalChartSettings = {
       xAxis: {
@@ -80,11 +80,11 @@
           tooltip: {
             valueDecimals: 2
           },
-          color: "#6bb27a"
+          color: "#76ff86"
         },
         Object.assign({
           data: hourlyPredictions,
-          dashStyle: 'ShortDashDotDot',
+          dashStyle: 'ShortDot',
           marker: {
             enabled: false
           }
@@ -180,6 +180,7 @@
           data: dailyPredictions,
           tooltip: {
             valueDecimals: 2,
+            dashStyle: 'ShortDot',
             marker: {
               enabled: false
             }
