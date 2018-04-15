@@ -49,7 +49,7 @@
       tooltip: {
         valueDecimals: 2
       },
-      color: "lightgreen"
+      color: "#66d9ef",
     };
     var generalChartSettings = {
       xAxis: {
@@ -79,10 +79,15 @@
           data: historicalHourlyPriceData,
           tooltip: {
             valueDecimals: 2
-          }
+          },
+          color: "#b1f96d"
         },
         Object.assign({
           data: hourlyPredictions,
+          dashStyle: 'dot',
+          marker: {
+            enabled: false
+          }
         }, generalPredictionSeriesSettings)
       ]
     }, generalChartSettings));
@@ -107,6 +112,9 @@
           color: "red",
           tooltip: {
             valueDecimals: 6
+          },
+          marker: {
+            enabled: false
           }
         },
         {
@@ -115,6 +123,9 @@
           data: vaderData,
           tooltip: {
             valueDecimals: 6
+          },
+          marker: {
+            enabled: false
           }
         }
       ]
@@ -132,7 +143,10 @@
         color: "blue",
         tooltip: {
           valueDecimals: 2
-        }
+        },
+        marker: {
+            enabled: false
+          }
       }]
     }, generalChartSettings));
     charts.push(chart);
@@ -152,7 +166,7 @@
           tooltip: {
             valueDecimals: 2
           },
-          color: "red"
+          color: "#ff9292"
         },
         {
           name: 'Low',
@@ -160,12 +174,16 @@
           tooltip: {
             valueDecimals: 2
           },
-          color: "yellow"
+          color: "#f8f994"
         },
         Object.assign({
           data: dailyPredictions,
           tooltip: {
-            valueDecimals: 2
+            valueDecimals: 2,
+            dashStyle: 'dot',
+            marker: {
+              enabled: false
+            }
           }
         }, generalPredictionSeriesSettings)
       ]
@@ -236,9 +254,9 @@
             <div id="prediction-container">
               <span id="prediction-number">$<%= Math.round(nextDailyPrediction[1], 2).toLocaleString() %></span>
             </div>
-            <% } else { %>  
+            <% } else { %>
               <div>No prediction</div>
-            <% } %>
+              <% } %>
         </div>
       </div>
       <div id="prediction-graphs-container">
