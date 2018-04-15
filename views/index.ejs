@@ -80,11 +80,11 @@
           tooltip: {
             valueDecimals: 2
           },
-          color: "#b1f96d"
+          color: "#6bb27a"
         },
         Object.assign({
           data: hourlyPredictions,
-          dashStyle: 'dot',
+          dashStyle: 'longdash',
           marker: {
             enabled: false
           }
@@ -104,7 +104,7 @@
     // Chart the sentiment
     chart = Highcharts.chart(CHART_hourlySentiment, Object.assign({
       title: {
-        text: 'Twitter Sentiment'
+        text: "Twitter Sentiment"
       },
       series: [{
           name: 'Textblob',
@@ -135,18 +135,18 @@
     //Chart the tweet count
     chart = Highcharts.chart(CHART_hourlyTweetCount, Object.assign({
       title: {
-        text: 'Tweets'
+        text: 'Tweets per hour'
       },
       series: [{
-        name: 'Count',
+        name: 'Tweets',
         data: hourlyTweetCount,
-        color: "blue",
         tooltip: {
           valueDecimals: 2
         },
         marker: {
-            enabled: false
-          }
+          enabled: false
+        },
+        color: "#64a8f4"
       }]
     }, generalChartSettings));
     charts.push(chart);
