@@ -134,7 +134,7 @@
   //Main route. Simplified using the new async/await
   app.get('/', async(req, res) => {
     let today = moment().toDate()
-    let houlyMinDate = moment().subtract(120, "hour").toDate()
+    let houlyMinDate = moment().subtract(164, "hour").toDate()
     let dailyMinDate = moment().subtract(30, "day").toDate()
 
     try {
