@@ -148,6 +148,7 @@
 
       var nextHourPrediction = await Mongoose.connection.db.collection('predictions')
         .find({ "type": "hourly", "date": { "$gt": moment(lastPrice[0]).toDate() } })
+        .sort({date: -1})
         .limit(1)
         .toArray();
 
@@ -176,6 +177,7 @@
       lastPrice = historicalDailyPrices[historicalDailyPrices.length - 1];
       nextDailyPrediction = await Mongoose.connection.db.collection('predictions')
         .find({ "type": "daily", "date": { "$gt": moment(lastPrice[0]).toDate() } })
+        .sort({date: -1})
         .limit(1)
         .toArray();
 
