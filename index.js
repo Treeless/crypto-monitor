@@ -153,6 +153,8 @@
 
       if (nextHourPrediction.length > 0)
         nextHourPrediction = nextHourPrediction[0]
+      else
+        nextHourPrediction = null
 
       console.log("HISTORICAL_HOURLY", historicalHourlyPrices.length);
       console.log("HOURLY_PREDICTIONS", hourlyPredictions.length);
@@ -172,13 +174,15 @@
       // Get next day's prediction (i know, duplicate code sucks, timecrunch ;) 
       var nextDailyPrediction = null;
       lastPrice = historicalDailyPrices[historicalDailyPrices.length - 1];
-      var nextDailyPrediction = await Mongoose.connection.db.collection('predictions')
+      nextDailyPrediction = await Mongoose.connection.db.collection('predictions')
         .find({ "type": "daily", "date": { "$gt": moment(lastPrice[0]).toDate() } })
         .limit(1)
         .toArray();
 
       if (nextDailyPrediction.length > 0)
         nextDailyPrediction = nextDailyPrediction[0]
+      else
+        nextDailyPrediction = null
 
       //Current
       let currentPrice = await getCurrentBitcoinPrice()
