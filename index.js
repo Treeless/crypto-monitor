@@ -142,35 +142,17 @@
       let historicalHourlyPrices = await getHistoricalPrice(houlyMinDate, today, "hourly");
       let hourlyPredictions = await getPredictions("hourly", houlyMinDate, today);
 
-
       //Rather then next hour's prediction. Say next prediction 1 hour after prices
       var nextHourPrediction = null;
       var lastPrice = historicalHourlyPrices[historicalHourlyPrices.length - 1];
-      var lastDate = moment(lastPrice[0]);
-      var nextHour = lastDate.add(1, "hour")
-      for (var i = 0; i < hourlyPredictions.length; i++) {
-        var time = moment(hourlyPredictions[i][0])
 
-        var year = time.year() == nextHour.year()
-        var month = time.month() == nextHour.month()
-        var day = time.day() == nextHour.day()
-        var hour = time.hour() == nextHour.hour()
-        var same = year && month && day && hour;
-        if (same) {
-          console.log("found next hour's prediction")
-          nextHourPrediction = hourlyPredictions[i];
-          break;
-        } else if (year && month && day) {
-          // Just check if its after the last hour
-          if (time.hour() > nextHour.hour()) {
-            // Lets use it
-            console.log("couldn't find next hour but this works...")
-            nextHourPrediction = hourlyPredictions[i];
-            break;
-          }
-        }
-      }
-      //
+      var nextHourPrediction = await Mongoose.connection.db.collection('predictions')
+        .find({ "type": "hourly", "date": { "$gt": moment(lastPrice[0]).toDate() } })
+        .limit(1)
+        .toArray();
+
+      if (nextHourPrediction.length > 0)
+        nextHourPrediction = nextHourPrediction[0]
 
       console.log("HISTORICAL_HOURLY", historicalHourlyPrices.length);
       console.log("HOURLY_PREDICTIONS", hourlyPredictions.length);
@@ -189,32 +171,14 @@
 
       // Get next day's prediction (i know, duplicate code sucks, timecrunch ;) 
       var nextDailyPrediction = null;
-      var lastPrice = historicalDailyPrices[historicalDailyPrices.length - 1];
-      var lastDate = moment(lastPrice[0]);
-      var nextHour = lastDate.add(1, "hour")
-      for (var i = 0; i < dailyPredictions.length; i++) {
-        var time = moment(dailyPredictions[i][0])
+      lastPrice = historicalDailyPrices[historicalDailyPrices.length - 1];
+      var nextDailyPrediction = await Mongoose.connection.db.collection('predictions')
+        .find({ "type": "daily", "date": { "$gt": moment(lastPrice[0]).toDate() } })
+        .limit(1)
+        .toArray();
 
-        var year = time.year() == nextHour.year()
-        var month = time.month() == nextHour.month()
-        var day = time.day() == nextHour.day()
-        var hour = time.hour() == nextHour.hour()
-        var same = year && month && day && hour;
-        if (same) {
-          console.log("found next hour's prediction")
-          nextDailyPrediction = dailyPredictions[i];
-          break;
-        } else if (year && month && day) {
-          // Just check if its after the last hour
-          if (time.hour() > nextHour.hour()) {
-            // Lets use it
-            console.log("couldn't find next hour but this works...")
-            nextDailyPrediction = dailyPredictions[i];
-            break;
-          }
-        }
-      }
-      //
+      if (nextDailyPrediction.length > 0)
+        nextDailyPrediction = nextDailyPrediction[0]
 
       //Current
       let currentPrice = await getCurrentBitcoinPrice()

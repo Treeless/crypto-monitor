@@ -228,13 +228,13 @@
           <h2 id="title">Last Hourly Prediction</h2>
           <% if(locals.nextHourPrediction){ %>
             <div>
-              <span class="fa fa-clock-o"> <%= moment(nextHourPrediction[0]).format("YYYY-MM-DD h:mm a") %></span>
+              <span class="fa fa-clock-o"> <%= moment(nextHourPrediction.date).format("YYYY-MM-DD h:mm a") %></span>
             </div>
             <div>
-              <small><%= moment(nextHourPrediction[0]).from(Date.now()) %></small>
+              <small><%= moment(nextHourPrediction.date).from(Date.now()) %></small>
             </div>
             <div id="prediction-container">
-              <span id="prediction-number">$<%= Math.round(nextHourPrediction[1], 2).toLocaleString() %></span>
+              <span id="prediction-number">$<%= Math.round(parseFloat(nextHourPrediction.price), 2).toLocaleString() %></span>
             </div>
             <% } else { %>
               <div>No predictions</div>
